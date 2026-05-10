@@ -12,8 +12,13 @@ import { Search, Filter, SlidersHorizontal, ChevronLeft, ChevronRight, X } from 
 
 export default function TicketList() {
   const [tickets, setTickets] = useState([])
+  const [searchParams] = useSearchParams()
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 })
-  const [filters, setFilters] = useState({ status: '', priority: '', search: '' })
+  const [filters, setFilters] = useState(() => ({ 
+    status: '', 
+    priority: '', 
+    search: searchParams.get('search') || '' 
+  }))
   const [openFilter, setOpenFilter] = useState(null)
   const [visibleColumns, setVisibleColumns] = useState({
     code: true,
@@ -27,7 +32,6 @@ export default function TicketList() {
     actions: true
   })
   const [loading, setLoading] = useState(true)
-  const [searchParams] = useSearchParams()
 
   // Modal de asignacion/reasignacion inteligente
   const [assignModal, setAssignModal] = useState(false)
@@ -67,18 +71,25 @@ export default function TicketList() {
     }
   }, [filters.status, filters.priority, filters.search, pagination.page])
 
-  // Leer search de URL al montar
+  // Leer search de URL al cambiar
   useEffect(() => {
-    loadTicketsRef.current = loadTickets
     const urlSearch = searchParams.get('search')
-    if (urlSearch) {
+    if (urlSearch !== null && urlSearch !== filters.search) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFilters(f => ({ ...f, search: urlSearch }))
+      setPagination(p => ({ ...p, page: 1 }))
     }
-    // Carga inicial explícita
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
+
+  // Carga inicial explícita al montar
+  useEffect(() => {
+    loadTicketsRef.current = loadTickets
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadTickets()
     isInitialMount.current = false
-  }, [loadTickets, searchParams])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Solo se dispara por cambios en filtros de select (no search, no mount)
   useEffect(() => {

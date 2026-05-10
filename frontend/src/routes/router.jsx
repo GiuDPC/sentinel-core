@@ -27,6 +27,7 @@ const UserManagement = lazy(() => import('../pages/admin/UserManagement'))
 const CategoryManagement = lazy(() => import('../pages/admin/CategoryManagement'))
 const Reports = lazy(() => import('../pages/admin/Reports'))
 const AuditLogs = lazy(() => import('../pages/admin/AuditLogs'))
+const BackupManager = lazy(() => import('../pages/admin/BackupManager'))
 
 // Profile page
 const ProfilePage = lazy(() => import('../pages/ProfilePage'))
@@ -152,6 +153,14 @@ export function AppRouter() {
                 element={
                   <ProtectedRoute allowedRoles={['ADMIN']}>
                     <LazyPage><AuditLogs /></LazyPage>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/backups"
+                element={
+                  <ProtectedRoute allowedRoles={['ADMIN']}>
+                    <LazyPage><BackupManager /></LazyPage>
                   </ProtectedRoute>
                 }
               />

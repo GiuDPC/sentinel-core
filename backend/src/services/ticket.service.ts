@@ -301,7 +301,7 @@ async function findById(id: string, userRole?: string) {
             select: { id: true, firstName: true, lastName: true },
           },
         },
-        orderBy: { createdAt: 'asc' },
+        orderBy: { createdAt: 'desc' },
       },
     },
   });
