@@ -6,35 +6,35 @@ import { auditService } from './audit.service.js';
 import { isValidTransition } from '../utils/state-machine.js';
 import { sanitizeTicketInput } from '../utils/sanitize.js';
 import { notificationService } from './notification.service.js';
+import { TICKET_STATUS, AUDIT_ACTIONS, ROLES } from '../config/constants.js';
+import type { Prisma } from '../../generated/prisma/index.js';
+import { TicketStatus, TicketPriority, Department } from '../../generated/prisma/index.js';
 
-/**
- * Auto-asigna un técnico basado en la categoría del ticket.
- * Selecciona el técnico con menor carga de trabajo del departamento correspondiente.
- * Si no hay técnicos disponibles, el ticket queda en OPEN.
- */
+type TransactionClient = Prisma.TransactionClient;
+
+
 async function autoAssign(
   ticketId: string,
   categoryDepartment: string | null,
   creatorId: string,
-  tx: any
+  tx: TransactionClient
 ) {
   // Construir where clause dinámicamente
-  const whereClause: any = {
-    role: { name: 'TECHNICIAN' },
+  const whereClause: Prisma.UserWhereInput = {
+    role: { name: ROLES.TECHNICIAN },
     isActive: true,
   };
   if (categoryDepartment) {
-    whereClause.department = categoryDepartment;
+    whereClause.department = categoryDepartment as Department;
   }
 
-  // Buscar técnicos activos del departamento con menor carga
   const technicians = await tx.user.findMany({
     where: whereClause,
     include: {
       assignments: {
         where: {
           ticket: {
-            status: { notIn: ['RESOLVED', 'CLOSED'] },
+            status: { notIn: [TICKET_STATUS.RESOLVED, TICKET_STATUS.CLOSED] },
           },
         },
       },
@@ -45,13 +45,13 @@ async function autoAssign(
 
   // Ordenar por menor carga de trabajo (least connections)
   const sorted = technicians
-    .map((tech: any) => ({
+    .map((tech) => ({
       id: tech.id,
       firstName: tech.firstName,
       lastName: tech.lastName,
       activeTickets: tech.assignments.length,
     }))
-    .sort((a: any, b: any) => a.activeTickets - b.activeTickets);
+    .sort((a, b) => a.activeTickets - b.activeTickets);
 
   const bestTech = sorted[0];
   const bestTechId = bestTech.id;
@@ -65,22 +65,24 @@ async function autoAssign(
   // Cambiar a ASSIGNED
   await tx.ticket.update({
     where: { id: ticketId },
-    data: { status: 'ASSIGNED' },
+    data: { status: TICKET_STATUS.ASSIGNED },
   });
 
   // Audit logs
-  await auditService.logAction(ticketId, creatorId, 'STATUS_CHANGE', 'OPEN', 'ASSIGNED', tx);
-  await auditService.logAction(ticketId, creatorId, 'ASSIGNMENT', null, bestTechName, tx);
+  await auditService.logAction(ticketId, creatorId, AUDIT_ACTIONS.STATUS_CHANGE, TICKET_STATUS.OPEN, TICKET_STATUS.ASSIGNED, tx);
+  await auditService.logAction(ticketId, creatorId, AUDIT_ACTIONS.ASSIGNMENT, null, bestTechName, tx);
 
   // Notificar al técnico
   const ticketInfo = await tx.ticket.findUnique({ where: { id: ticketId } });
-  await notificationService.createNotification({
-    userId: bestTechId,
-    title: 'Nuevo Ticket Asignado',
-    message: `Se te ha asignado el ticket #${ticketInfo.ticketCode}: ${ticketInfo.title}`,
-    type: 'ASSIGNMENT',
-    link: `/technician/ticket/${ticketId}`
-  });
+  if (ticketInfo) {
+    await notificationService.createNotification({
+      userId: bestTechId,
+      title: 'Nuevo Ticket Asignado',
+      message: `Se te ha asignado el ticket #${ticketInfo.ticketCode}: ${ticketInfo.title}`,
+      type: 'ASSIGNMENT',
+      link: `/technician/ticket/${ticketId}`
+    });
+  }
 
   return bestTechId;
 }
@@ -135,7 +137,7 @@ async function create(data: {
       data: {
         ticketId: ticket.id,
         userId: data.creatorId,
-        action: 'TICKET_CREATED',
+        action: AUDIT_ACTIONS.TICKET_CREATED,
         oldValue: null,
         newValue: null,
       },
@@ -202,9 +204,9 @@ async function findAll(filters: {
   const limit = filters.limit || 20;
   const skip = (page - 1) * limit;
 
-  const where: any = {};
-  if (filters.status) where.status = filters.status;
-  if (filters.priority) where.priority = filters.priority;
+  const where: Prisma.TicketWhereInput = {};
+  if (filters.status) where.status = filters.status as TicketStatus;
+  if (filters.priority) where.priority = filters.priority as TicketPriority;
   if (filters.categoryId) where.categoryId = filters.categoryId;
 
   // Búsqueda "Super Power" por texto en múltiples campos y relaciones
@@ -291,7 +293,7 @@ async function findById(id: string, userRole?: string) {
         },
       },
       comments: {
-        where: userRole === 'REQUESTER' ? { isInternal: false } : {},
+        where: userRole === ROLES.REQUESTER ? { isInternal: false } : {},
         include: {
           user: {
             select: { id: true, firstName: true, lastName: true },
@@ -328,12 +330,12 @@ async function updateStatus(
   userRole: string
 ) {
   // Validar que el status sea un valor válido del enum
-  const validStatuses = ['OPEN', 'ASSIGNED', 'IN_PROGRESS', 'ON_HOLD', 'RESOLVED', 'AWAITING_CONFIRMATION', 'CLOSED'];
-  if (!validStatuses.includes(newStatus)) {
+  const validStatuses = Object.values(TICKET_STATUS);
+  if (!validStatuses.includes(newStatus as TicketStatus)) {
     throw new AppError(400, 'Estado inválido');
   }
 
-  if (newStatus === 'RESOLVED') {
+  if (newStatus === TICKET_STATUS.RESOLVED) {
     throw new AppError(400, 'Para resolver un ticket, debés usar el endpoint específico de resolución con nota');
   }
 
@@ -346,7 +348,7 @@ async function updateStatus(
   }
 
   // Verificar ownership para técnicos
-  if (userRole === 'TECHNICIAN') {
+  if (userRole === ROLES.TECHNICIAN) {
     const isAssigned = ticket.assignments.some((a) => a.technicianId === userId);
     if (!isAssigned) {
       throw new AppError(403, 'Solo podés cambiar el estado de tickets asignados a vos');
@@ -363,7 +365,7 @@ async function updateStatus(
   return prisma.$transaction(async (tx) => {
     const updated = await tx.ticket.update({
       where: { id: ticketId },
-      data: { status: newStatus as any },
+      data: { status: newStatus as Prisma.EnumTicketStatusFieldUpdateOperationsInput['set'] },
       include: {
         category: true,
         creator: {
@@ -374,7 +376,7 @@ async function updateStatus(
     await auditService.logAction(
       ticketId,
       userId,
-      'STATUS_CHANGE',
+      AUDIT_ACTIONS.STATUS_CHANGE,
       ticket.status,
       newStatus,
       tx
@@ -414,7 +416,7 @@ async function resolveWithNote(
     throw new AppError(403, 'Solo podés resolver tickets asignados a vos');
   }
 
-  if (!isValidTransition(ticket.status, 'RESOLVED')) {
+  if (!isValidTransition(ticket.status, TICKET_STATUS.RESOLVED)) {
     throw new AppError(422, `No se puede resolver un ticket en estado ${ticket.status}`);
   }
 
@@ -426,7 +428,7 @@ async function resolveWithNote(
     const updated = await tx.ticket.update({
       where: { id: ticketId },
       data: {
-        status: 'AWAITING_CONFIRMATION',
+        status: TICKET_STATUS.AWAITING_CONFIRMATION,
         resolutionNote: data.resolutionNote.trim(),
         resolvedAt: new Date(),
       },
@@ -438,8 +440,8 @@ async function resolveWithNote(
       },
     });
 
-    await auditService.logAction(ticketId, userId, 'STATUS_CHANGE', ticket.status, 'AWAITING_CONFIRMATION', tx);
-    await auditService.logAction(ticketId, userId, 'RESOLUTION_NOTE', null, data.resolutionNote.trim(), tx);
+    await auditService.logAction(ticketId, userId, AUDIT_ACTIONS.STATUS_CHANGE, ticket.status, TICKET_STATUS.AWAITING_CONFIRMATION, tx);
+    await auditService.logAction(ticketId, userId, AUDIT_ACTIONS.RESOLUTION_NOTE, null, data.resolutionNote.trim(), tx);
 
     // Notificar al creador que debe confirmar
     await notificationService.createNotification({
@@ -467,7 +469,7 @@ async function confirmTicket(
   const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
   if (!ticket) throw new AppError(404, 'Ticket no encontrado');
 
-  if (ticket.status !== 'AWAITING_CONFIRMATION') {
+  if (ticket.status !== TICKET_STATUS.AWAITING_CONFIRMATION) {
     throw new AppError(422, 'El ticket no está esperando confirmación');
   }
 
@@ -481,7 +483,7 @@ async function confirmTicket(
       const updated = await tx.ticket.update({
         where: { id: ticketId },
         data: {
-          status: 'CLOSED',
+          status: TICKET_STATUS.CLOSED,
         },
         include: {
           category: true,
@@ -489,8 +491,8 @@ async function confirmTicket(
         },
       });
 
-      await auditService.logAction(ticketId, userId, 'STATUS_CHANGE', 'AWAITING_CONFIRMATION', 'CLOSED', tx);
-      await auditService.logAction(ticketId, userId, 'TICKET_CONFIRMED', null, 'Confirmado por el solicitante', tx);
+      await auditService.logAction(ticketId, userId, AUDIT_ACTIONS.STATUS_CHANGE, TICKET_STATUS.AWAITING_CONFIRMATION, TICKET_STATUS.CLOSED, tx);
+      await auditService.logAction(ticketId, userId, AUDIT_ACTIONS.TICKET_CONFIRMED, null, 'Confirmado por el solicitante', tx);
 
       // Notificar al técnico que el ticket fue confirmado/cerrado
       const assignment = await tx.assignment.findFirst({ where: { ticketId } });
@@ -510,7 +512,7 @@ async function confirmTicket(
       const updated = await tx.ticket.update({
         where: { id: ticketId },
         data: {
-          status: 'IN_PROGRESS',
+          status: TICKET_STATUS.IN_PROGRESS,
           resolvedAt: null,
           resolutionNote: null,
         },
@@ -520,8 +522,8 @@ async function confirmTicket(
         },
       });
 
-      await auditService.logAction(ticketId, userId, 'STATUS_CHANGE', 'AWAITING_CONFIRMATION', 'IN_PROGRESS', tx);
-      await auditService.logAction(ticketId, userId, 'TICKET_REOPENED', null, data.comment || 'Falla persiste', tx);
+      await auditService.logAction(ticketId, userId, AUDIT_ACTIONS.STATUS_CHANGE, TICKET_STATUS.AWAITING_CONFIRMATION, TICKET_STATUS.IN_PROGRESS, tx);
+      await auditService.logAction(ticketId, userId, AUDIT_ACTIONS.TICKET_REOPENED, null, data.comment || 'Falla persiste', tx);
 
       // Notificar al técnico de la reapertura
       const assignment = await tx.assignment.findFirst({ where: { ticketId } });
@@ -548,9 +550,9 @@ async function findByCreator(creatorId: string, filters: { status?: string; prio
   const limit = filters.limit || 20;
   const skip = (page - 1) * limit;
 
-  const where: any = { creatorId };
-  if (filters.status) where.status = filters.status;
-  if (filters.priority) where.priority = filters.priority;
+  const where: Prisma.TicketWhereInput = { creatorId };
+  if (filters.status) where.status = filters.status as TicketStatus;
+  if (filters.priority) where.priority = filters.priority as TicketPriority;
 
   if (filters.search) {
     const searchTerms = filters.search.trim().split(/\s+/);
@@ -610,11 +612,11 @@ async function findAssigned(technicianId: string, filters: { status?: string; pr
   const limit = filters.limit || 20;
   const skip = (page - 1) * limit;
 
-  const where: any = {
+  const where: Prisma.TicketWhereInput = {
     assignments: { some: { technicianId } },
   };
-  if (filters.status) where.status = filters.status;
-  if (filters.priority) where.priority = filters.priority;
+  if (filters.status) where.status = filters.status as TicketStatus;
+  if (filters.priority) where.priority = filters.priority as TicketPriority;
 
   if (filters.search) {
     const searchTerms = filters.search.trim().split(/\s+/);

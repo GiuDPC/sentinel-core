@@ -8,7 +8,9 @@ export function errorHandler(
   _next: NextFunction
 ): void {
   console.error(`[ERROR] ${err.message}`);
-  console.error(err);
+  if (process.env.NODE_ENV !== 'production') {
+    console.error(err);
+  }
 
   if (err instanceof AppError) {
     res.status(err.statusCode).json({ error: err.message });

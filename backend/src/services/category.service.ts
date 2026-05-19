@@ -1,5 +1,6 @@
 import { prisma } from '../config/prisma.js';
 import { AppError } from '../utils/app-error.js';
+import { Department } from '../../generated/prisma/index.js';
 
 async function findAll() {
     return prisma.category.findMany({
@@ -31,7 +32,7 @@ async function create(data: { name: string; department: string; slaHours: number
     return prisma.category.create({
         data: {
             name: data.name,
-            department: data.department as any,
+            department: data.department as Department,
             slaHours: data.slaHours,
         },
     });
@@ -47,7 +48,7 @@ async function update(id: number, data: { name?: string; department?: string; sl
         where: { id },
         data: {
             name: data.name ?? category.name,
-            department: data.department ? data.department as any : category.department,
+            department: data.department ? data.department as Department : category.department,
             slaHours: data.slaHours ?? category.slaHours,
             isActive: data.isActive ?? category.isActive,
         },

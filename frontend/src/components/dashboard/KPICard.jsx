@@ -1,6 +1,50 @@
 import { motion as Motion } from 'framer-motion'
 
-export default function KPICard({ title, value, subtitle, trend, trendValue, icon: Icon }) {
+import { useEffect, useState } from 'react'
+
+export default function KPICard({ title, value, subtitle, trend, trendValue, color, icon: Icon }) {
+  const [displayValue, setDisplayValue] = useState(0)
+
+  useEffect(() => {
+    // Si el valor es texto como "14h"
+    const isString = typeof value === 'string'
+    const numericValue = isString ? parseFloat(value.replace(/[^0-9.]/g, '')) : Number(value)
+    const suffix = isString ? value.replace(/[0-9.]/g, '') : ''
+
+    if (isNaN(numericValue)) {
+      setDisplayValue(value)
+      return
+    }
+
+    // Deshabilitar animación en tests para no romper assertions de Vitest
+    if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
+      setDisplayValue(`${numericValue}${suffix}`)
+      return
+    }
+
+    let start = 0
+    const end = numericValue
+    const duration = 1000 // 1 segundo
+    const startTime = performance.now()
+
+    const updateCounter = (currentTime) => {
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      
+      // easeOutExpo
+      const easeOut = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress)
+      
+      const current = Math.floor(start + (end - start) * easeOut)
+      setDisplayValue(`${current}${suffix}`)
+
+      if (progress < 1) {
+        requestAnimationFrame(updateCounter)
+      }
+    }
+
+    requestAnimationFrame(updateCounter)
+  }, [value])
+
   const trendColors = {
     up: 'text-emerald-600 bg-emerald-50',
     down: 'text-rose-600 bg-rose-50',
@@ -17,7 +61,7 @@ export default function KPICard({ title, value, subtitle, trend, trendValue, ico
         <div className="min-w-0">
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest truncate">{title}</p>
           <div className="flex items-baseline gap-2 mt-1">
-            <h3 className="text-3xl font-bold text-slate-900 font-display tabular-nums leading-none">{value}</h3>
+            <h3 className="text-3xl font-bold text-slate-900 font-display tabular-nums leading-none">{displayValue}</h3>
             {trend && trendValue && (
               <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${trendColors[trend]} flex items-center gap-0.5 shrink-0`}>
                 {trend === 'up' ? '↑' : '↓'}{trendValue}

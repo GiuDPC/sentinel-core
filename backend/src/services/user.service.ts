@@ -11,7 +11,6 @@ async function findAll() {
     orderBy: { createdAt: 'desc' },
   });
 
-  // Quitar passwordHash de la respuesta
   return users.map(({ passwordHash, ...user }) => user);
 }
 
@@ -45,7 +44,6 @@ async function update(id: string, data: {
     throw new AppError(404, 'Usuario no encontrado');
   }
 
-  // Si cambia el email, verificar que no esté en uso
   if (data.email && data.email !== user.email) {
     const existing = await prisma.user.findUnique({
       where: { email: data.email },
@@ -82,10 +80,7 @@ async function softDelete(id: string) {
   return { message: 'Usuario desactivado' };
 }
 
-/**
- * Actualizar perfil del usuario actual.
- * Cualquier usuario puede actualizar su nombre, teléfono.
- */
+
 async function updateProfile(id: string, data: {
   firstName?: string;
   lastName?: string;

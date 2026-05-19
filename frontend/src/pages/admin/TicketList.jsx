@@ -9,6 +9,7 @@ import notifications from '../../components/ui/Notifications'
 import CommentSection from '../../components/dashboard/CommentSection'
 import TicketTimeline from '../../components/dashboard/TicketTimeline'
 import { Search, Filter, SlidersHorizontal, ChevronLeft, ChevronRight, X } from 'lucide-react'
+import { motion as Motion } from 'framer-motion'
 
 export default function TicketList() {
   const [tickets, setTickets] = useState([])
@@ -353,9 +354,21 @@ return (
       {/* Tabla - Estilo Técnico */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mt-6">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-4">
-            <div className="w-10 h-10 border-4 border-slate-100 border-t-blue-600 rounded-full animate-spin" />
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Cargando Tickets...</p>
+          <div className="w-full overflow-hidden animate-pulse">
+            <div className="border-b border-slate-100 bg-slate-50/50 flex px-6 py-4">
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} className="h-4 bg-slate-200 rounded w-24 mr-8" />
+              ))}
+            </div>
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="flex px-6 py-5 border-b border-slate-100 items-center">
+                <div className="h-5 bg-slate-200 rounded-md w-16 mr-6" />
+                <div className="h-4 bg-slate-200 rounded w-48 mr-6" />
+                <div className="h-5 bg-slate-200 rounded-full w-20 mr-6" />
+                <div className="h-5 bg-slate-200 rounded-md w-24 mr-auto" />
+                <div className="h-8 bg-slate-200 rounded-lg w-20" />
+              </div>
+            ))}
           </div>
         ) : tickets.length === 0 ? (
           <div className="text-center py-24 px-6">
@@ -389,7 +402,7 @@ return (
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {tickets.map((ticket) => {
+                {tickets.map((ticket, index) => {
                   const isSlaBreached = ticket.dueDate && new Date(ticket.dueDate) < new Date() && !['RESOLVED', 'CLOSED'].includes(ticket.status);
                   const isSlaAtRisk = ticket.dueDate && !isSlaBreached && new Date(ticket.dueDate) < new Date(new Date().getTime() + 2 * 60 * 60 * 1000);
                   return (
