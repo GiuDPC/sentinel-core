@@ -111,7 +111,7 @@ async function assignTechnician(
       assignedBy,
       'ASSIGNMENT',
       null,
-      technicianId,
+      `${technician.firstName} ${technician.lastName}`,
       tx
     );
 
@@ -144,7 +144,7 @@ async function reassignTechnician(
   return prisma.$transaction(async (tx) => {
     const ticket = await tx.ticket.findUnique({
       where: { id: ticketId },
-      include: { assignments: true },
+      include: { assignments: { include: { technician: true } } },
     });
     if (!ticket) throw new AppError(404, 'Ticket no encontrado');
 
@@ -164,8 +164,9 @@ async function reassignTechnician(
       throw new AppError(400, 'El usuario seleccionado no es un técnico');
     }
 
-    // Guardar ID del técnico anterior para audit
-    const previousTechId = ticket.assignments[0]?.technicianId || null;
+    // Guardar nombre del técnico anterior para audit
+    const previousTech = ticket.assignments[0]?.technician;
+    const previousTechName = previousTech ? `${previousTech.firstName} ${previousTech.lastName}` : null;
 
     // Remover todas las asignaciones anteriores
     await tx.assignment.deleteMany({
@@ -191,8 +192,8 @@ async function reassignTechnician(
       ticketId,
       reassignedBy,
       'REASSIGNMENT',
-      previousTechId,
-      newTechnicianId,
+      previousTechName,
+      `${technician.firstName} ${technician.lastName}`,
       tx
     );
 

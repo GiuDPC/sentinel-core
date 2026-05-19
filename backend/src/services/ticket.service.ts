@@ -47,11 +47,15 @@ async function autoAssign(
   const sorted = technicians
     .map((tech: any) => ({
       id: tech.id,
+      firstName: tech.firstName,
+      lastName: tech.lastName,
       activeTickets: tech.assignments.length,
     }))
     .sort((a: any, b: any) => a.activeTickets - b.activeTickets);
 
-  const bestTechId = sorted[0].id;
+  const bestTech = sorted[0];
+  const bestTechId = bestTech.id;
+  const bestTechName = `${bestTech.firstName} ${bestTech.lastName}`;
 
   // Crear asignación
   await tx.assignment.create({
@@ -66,7 +70,7 @@ async function autoAssign(
 
   // Audit logs
   await auditService.logAction(ticketId, creatorId, 'STATUS_CHANGE', 'OPEN', 'ASSIGNED', tx);
-  await auditService.logAction(ticketId, creatorId, 'ASSIGNMENT', null, bestTechId, tx);
+  await auditService.logAction(ticketId, creatorId, 'ASSIGNMENT', null, bestTechName, tx);
 
   // Notificar al técnico
   const ticketInfo = await tx.ticket.findUnique({ where: { id: ticketId } });
