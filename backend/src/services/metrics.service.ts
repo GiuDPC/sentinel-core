@@ -1,31 +1,33 @@
 import { prisma } from '../config/prisma.js';
+import { TICKET_STATUS } from '../config/constants.js';
+import type { Prisma } from '../../generated/prisma/index.js';
+
+type TransactionClient = Prisma.TransactionClient;
 
 async function getDashboard() {
   const now = new Date();
 
-  // ── Contadores generales
-  const [
-    totalTickets,
-    openTickets,
-    assignedTickets,
-    inProgressTickets,
-    onHoldTickets,
-    resolvedTickets,
-    closedTickets,
-  ] = await Promise.all([
-    prisma.ticket.count(),
-    prisma.ticket.count({ where: { status: 'OPEN' } }),
-    prisma.ticket.count({ where: { status: 'ASSIGNED' } }),
-    prisma.ticket.count({ where: { status: 'IN_PROGRESS' } }),
-    prisma.ticket.count({ where: { status: 'ON_HOLD' } }),
-    prisma.ticket.count({ where: { status: 'RESOLVED' } }),
-    prisma.ticket.count({ where: { status: 'CLOSED' } }),
-  ]);
+  // ── Contadores generales (optimizado: 1 query groupBy en vez de 7 counts)
+  const statusCounts = await prisma.ticket.groupBy({
+    by: ['status'],
+    _count: { id: true },
+  });
+
+  const countByStatus = (status: string) =>
+    statusCounts.find((s) => s.status === status)?._count.id ?? 0;
+
+  const totalTickets = statusCounts.reduce((sum, s) => sum + s._count.id, 0);
+  const openTickets = countByStatus(TICKET_STATUS.OPEN);
+  const assignedTickets = countByStatus(TICKET_STATUS.ASSIGNED);
+  const inProgressTickets = countByStatus(TICKET_STATUS.IN_PROGRESS);
+  const onHoldTickets = countByStatus(TICKET_STATUS.ON_HOLD);
+  const resolvedTickets = countByStatus(TICKET_STATUS.RESOLVED);
+  const closedTickets = countByStatus(TICKET_STATUS.CLOSED);
 
   // ── SLA vencidos tickets activos pasados de fecha
   const slaBreached = await prisma.ticket.count({
     where: {
-      status: { notIn: ['RESOLVED', 'CLOSED'] },
+      status: { notIn: [TICKET_STATUS.RESOLVED, TICKET_STATUS.CLOSED] },
       dueDate: { lt: now },
     },
   });
@@ -59,16 +61,16 @@ async function getDashboard() {
 
   // ── Tickets por estado 
   const ticketsByStatus = [
-    { status: 'OPEN', count: openTickets },
-    { status: 'ASSIGNED', count: assignedTickets },
-    { status: 'IN_PROGRESS', count: inProgressTickets },
-    { status: 'ON_HOLD', count: onHoldTickets },
-    { status: 'RESOLVED', count: resolvedTickets },
-    { status: 'CLOSED', count: closedTickets },
+    { status: TICKET_STATUS.OPEN, count: openTickets },
+    { status: TICKET_STATUS.ASSIGNED, count: assignedTickets },
+    { status: TICKET_STATUS.IN_PROGRESS, count: inProgressTickets },
+    { status: TICKET_STATUS.ON_HOLD, count: onHoldTickets },
+    { status: TICKET_STATUS.RESOLVED, count: resolvedTickets },
+    { status: TICKET_STATUS.CLOSED, count: closedTickets },
   ];
 
   // ── Promedio de resolución horas (Optimizado con SQL nativo)
-  const result: any = await prisma.$queryRaw`
+  const result = await prisma.$queryRaw<[{ avg: number }]>`
     SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (updated_at - created_at)) / 3600), 0) as avg
     FROM tickets
     WHERE status IN ('RESOLVED', 'CLOSED')
@@ -99,7 +101,7 @@ async function getDashboard() {
   const twoHoursFromNow = new Date(now.getTime() + 2 * 60 * 60 * 1000);
   const slaAtRisk = await prisma.ticket.count({
     where: {
-      status: { notIn: ['RESOLVED', 'CLOSED'] },
+      status: { notIn: [TICKET_STATUS.RESOLVED, TICKET_STATUS.CLOSED] },
       dueDate: { gt: now, lt: twoHoursFromNow },
     },
   });
@@ -130,7 +132,7 @@ async function getDashboard() {
 async function getSlaBreachedTickets() {
   return prisma.ticket.findMany({
     where: {
-      status: { notIn: ['RESOLVED', 'CLOSED'] },
+      status: { notIn: [TICKET_STATUS.RESOLVED, TICKET_STATUS.CLOSED] },
       dueDate: { lt: new Date() },
     },
     include: {
@@ -146,8 +148,6 @@ async function getSlaBreachedTickets() {
   });
 }
 
-export const metricsService = { getDashboard, getSlaBreachedTickets, getRequesterMetrics, getTechnicianMetrics };
-
 /**
  * Métricas específicas del solicitante.
  */
@@ -156,27 +156,27 @@ async function getRequesterMetrics(userId: string) {
 
   const [total, open, inProgress, resolved, slaBreached, slaAtRisk] = await Promise.all([
     prisma.ticket.count({ where: { creatorId: userId } }),
-    prisma.ticket.count({ where: { creatorId: userId, status: 'OPEN' } }),
-    prisma.ticket.count({ where: { creatorId: userId, status: 'IN_PROGRESS' } }),
-    prisma.ticket.count({ where: { creatorId: userId, status: { in: ['RESOLVED', 'CLOSED'] } } }),
+    prisma.ticket.count({ where: { creatorId: userId, status: TICKET_STATUS.OPEN } }),
+    prisma.ticket.count({ where: { creatorId: userId, status: TICKET_STATUS.IN_PROGRESS } }),
+    prisma.ticket.count({ where: { creatorId: userId, status: { in: [TICKET_STATUS.RESOLVED, TICKET_STATUS.CLOSED] } } }),
     prisma.ticket.count({
       where: {
         creatorId: userId,
-        status: { notIn: ['RESOLVED', 'CLOSED'] },
+        status: { notIn: [TICKET_STATUS.RESOLVED, TICKET_STATUS.CLOSED] },
         dueDate: { lt: now },
       },
     }),
     prisma.ticket.count({
       where: {
         creatorId: userId,
-        status: { notIn: ['RESOLVED', 'CLOSED'] },
+        status: { notIn: [TICKET_STATUS.RESOLVED, TICKET_STATUS.CLOSED] },
         dueDate: { gt: now, lt: new Date(now.getTime() + 2 * 60 * 60 * 1000) },
       },
     }),
   ]);
 
   // Promedio de resolución de tickets del solicitante (Optimizado con SQL nativo)
-  const reqResult: any = await prisma.$queryRaw`
+  const reqResult = await prisma.$queryRaw<[{ avg: number }]>`
     SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (updated_at - created_at)) / 3600), 0) as avg
     FROM tickets
     WHERE status IN ('RESOLVED', 'CLOSED') AND creator_id = ${userId}
@@ -201,49 +201,37 @@ async function getRequesterMetrics(userId: string) {
 
 /**
  * Métricas específicas del técnico.
+ * Optimizado: usa JOINs directos con condiciones en vez de N+1 (fetch IDs → count con IN).
  */
 async function getTechnicianMetrics(userId: string) {
   const now = new Date();
 
-  const assignedTicketIds = await prisma.assignment.findMany({
-    where: { technicianId: userId },
-    select: { ticketId: true },
-  });
-  const ticketIds = assignedTicketIds.map((a) => a.ticketId);
-
-  if (ticketIds.length === 0) {
-    return {
-      totalAssigned: 0,
-      inProgress: 0,
-      resolved: 0,
-      slaBreached: 0,
-      slaAtRisk: 0,
-      avgResolutionHours: 0,
-    };
-  }
+  const baseWhere = {
+    assignments: { some: { technicianId: userId } },
+  };
 
   const [totalAssigned, inProgress, resolved, slaBreached, slaAtRisk] = await Promise.all([
-    prisma.ticket.count({ where: { id: { in: ticketIds } } }),
-    prisma.ticket.count({ where: { id: { in: ticketIds }, status: 'IN_PROGRESS' } }),
-    prisma.ticket.count({ where: { id: { in: ticketIds }, status: { in: ['RESOLVED', 'CLOSED'] } } }),
+    prisma.ticket.count({ where: baseWhere }),
+    prisma.ticket.count({ where: { ...baseWhere, status: TICKET_STATUS.IN_PROGRESS } }),
+    prisma.ticket.count({ where: { ...baseWhere, status: { in: [TICKET_STATUS.RESOLVED, TICKET_STATUS.CLOSED] } } }),
     prisma.ticket.count({
       where: {
-        id: { in: ticketIds },
-        status: { notIn: ['RESOLVED', 'CLOSED'] },
+        ...baseWhere,
+        status: { notIn: [TICKET_STATUS.RESOLVED, TICKET_STATUS.CLOSED] },
         dueDate: { lt: now },
       },
     }),
     prisma.ticket.count({
       where: {
-        id: { in: ticketIds },
-        status: { notIn: ['RESOLVED', 'CLOSED'] },
+        ...baseWhere,
+        status: { notIn: [TICKET_STATUS.RESOLVED, TICKET_STATUS.CLOSED] },
         dueDate: { gt: now, lt: new Date(now.getTime() + 2 * 60 * 60 * 1000) },
       },
     }),
   ]);
 
   // Promedio de resolución (Optimizado con SQL nativo)
-  const techResult: any = await prisma.$queryRaw`
+  const techResult = await prisma.$queryRaw<[{ avg: number }]>`
     SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (t.updated_at - t.created_at)) / 3600), 0) as avg
     FROM tickets t
     INNER JOIN assignments a ON t.id = a.ticket_id
@@ -261,3 +249,4 @@ async function getTechnicianMetrics(userId: string) {
   };
 }
 
+export const metricsService = { getDashboard, getSlaBreachedTickets, getRequesterMetrics, getTechnicianMetrics };

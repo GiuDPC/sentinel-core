@@ -73,17 +73,19 @@ export class NotificationService {
   /**
    * Notifica a los administradores
    */
-  async notifyAdmins(data: { title: string; message: string; type: any; link?: string }) {
+  async notifyAdmins(data: { title: string; message: string; type: 'TICKET_STATUS' | 'COMMENT' | 'ASSIGNMENT' | 'SYSTEM'; link?: string }) {
     const admins = await prisma.user.findMany({
       where: { role: { name: 'ADMIN' } }
     })
 
-    for (const admin of admins) {
-      await this.createNotification({
-        ...data,
-        userId: admin.id
-      })
-    }
+    await Promise.all(
+      admins.map((admin) =>
+        this.createNotification({
+          ...data,
+          userId: admin.id,
+        })
+      )
+    )
   }
 }
 

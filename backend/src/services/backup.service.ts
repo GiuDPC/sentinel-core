@@ -1,11 +1,11 @@
 import { prisma } from '../config/prisma.js';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import util from 'util';
 import fs from 'fs';
 import path from 'path';
 import { AppError } from '../utils/app-error.js';
 
-const execAsync = util.promisify(exec);
+const execFileAsync = util.promisify(execFile);
 const RAW_DB_URL = process.env.DATABASE_URL || '';
 // pg_dump y psql no soportan el parámetro '?schema=public' de Prisma, hay que sacarlo
 const DB_URL = RAW_DB_URL.split('?')[0];
@@ -50,19 +50,18 @@ async function createBackup(): Promise<BackupMetadata> {
   const backupFileName = `backup_${timestamp}.sql`;
   const backupPath = path.resolve(BACKUPS_DIR, backupFileName);
 
-  const command = `pg_dump "${DB_URL}" -f "${backupPath}" --clean --no-owner`;
-
   try {
-    await execAsync(command);
+    await execFileAsync('pg_dump', [DB_URL, '-f', backupPath, '--clean', '--no-owner']);
     const stats = fs.statSync(backupPath);
     return {
       filename: backupFileName,
       sizeBytes: stats.size,
       createdAt: stats.birthtime.toISOString()
     };
-  } catch (error: any) {
-    console.error("Error real al ejecutar pg_dump:", error.stderr || error.message || error);
-    throw new AppError(500, `Error al generar el respaldo: ${error.stderr || error.message}`);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Error al ejecutar pg_dump:", message);
+    throw new AppError(500, `Error al generar el respaldo: ${message}`);
   }
 }
 
@@ -78,14 +77,13 @@ async function restoreBackup(filename: string): Promise<void> {
 
   await prisma.$disconnect();
 
-  const command = `psql "${DB_URL}" -f "${filePath}"`;
-
   try {
-    await execAsync(command);
-  } catch (error: any) {
-    console.error("Error real al ejecutar psql:", error.stderr || error.message || error);
+    await execFileAsync('psql', [DB_URL, '-f', filePath]);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Error al ejecutar psql:", message);
     await prisma.$connect();
-    throw new AppError(500, `Error al restaurar la base de datos: ${error.stderr || error.message}`);
+    throw new AppError(500, `Error al restaurar la base de datos: ${message}`);
   }
 
   await prisma.$connect();

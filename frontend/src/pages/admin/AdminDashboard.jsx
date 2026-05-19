@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FileText, AlertCircle, Clock, CheckCircle } from 'lucide-react'
+import { motion as Motion } from 'framer-motion'
 import KPICard from '../../components/dashboard/KPICard'
 import RecentActivity from '../../components/dashboard/RecentActivity'
 import { metricsApi } from '../../api/metrics'
@@ -34,8 +35,20 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-accent/30 border-t-accent rounded-full animate-spin" />
+      <div className="space-y-8 animate-pulse">
+        <div>
+          <div className="h-8 w-64 bg-slate-200 rounded-lg mb-2" />
+          <div className="h-4 w-48 bg-slate-100 rounded" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-32 bg-slate-200 rounded-2xl border border-slate-100" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="h-64 bg-slate-200 rounded-xl" />
+          <div className="h-64 bg-slate-200 rounded-xl" />
+        </div>
       </div>
     )
   }
@@ -54,37 +67,53 @@ export default function AdminDashboard() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard
-          title="Total Tickets"
-          value={summary.totalTickets || 0}
-          subtitle={`${summary.ticketsThisMonth || 0} este mes`}
-          trend={summary.trendPercentage > 0 ? 'up' : summary.trendPercentage < 0 ? 'down' : 'neutral'}
-          trendValue={`${Math.abs(summary.trendPercentage) || 0}%`}
-          color="blue"
-          icon={FileText}
-        />
-        <KPICard
-          title="Tickets Abiertos"
-          value={summary.openTickets || 0}
-          color="yellow"
-          icon={AlertCircle}
-        />
-        <KPICard
-          title="Tiempo Vencido"
-          value={summary.slaBreached || 0}
-          subtitle={`${summary.slaAtRisk || 0} por vencer`}
-          color={summary.slaBreached > 0 ? 'red' : 'green'}
-          icon={Clock}
-        />
-        <KPICard
-          title="Tiempo Promedio"
-          value={`${summary.avgResolutionHours || 0}h`}
-          subtitle="para resolver"
-          color="blue"
-          icon={CheckCircle}
-        />
-      </div>
+      <Motion.div 
+        variants={{
+          hidden: { opacity: 0 },
+          show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+        }}
+        initial="hidden"
+        animate="show"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+      >
+        <Motion.div variants={{ hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } }}>
+          <KPICard
+            title="Total Tickets"
+            value={summary.totalTickets || 0}
+            subtitle={`${summary.ticketsThisMonth || 0} este mes`}
+            trend={summary.trendPercentage > 0 ? 'up' : summary.trendPercentage < 0 ? 'down' : 'neutral'}
+            trendValue={`${Math.abs(summary.trendPercentage) || 0}%`}
+            color="blue"
+            icon={FileText}
+          />
+        </Motion.div>
+        <Motion.div variants={{ hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } }}>
+          <KPICard
+            title="Tickets Abiertos"
+            value={summary.openTickets || 0}
+            color="yellow"
+            icon={AlertCircle}
+          />
+        </Motion.div>
+        <Motion.div variants={{ hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } }}>
+          <KPICard
+            title="Tiempo Vencido"
+            value={summary.slaBreached || 0}
+            subtitle={`${summary.slaAtRisk || 0} por vencer`}
+            color={summary.slaBreached > 0 ? 'red' : 'green'}
+            icon={Clock}
+          />
+        </Motion.div>
+        <Motion.div variants={{ hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } }}>
+          <KPICard
+            title="Tiempo Promedio"
+            value={`${summary.avgResolutionHours || 0}h`}
+            subtitle="para resolver"
+            color="blue"
+            icon={CheckCircle}
+          />
+        </Motion.div>
+      </Motion.div>
 
       {/* Estadisticas por categoria y estado */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -108,21 +137,29 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="space-y-3">
-            {(metrics?.ticketsByCategory || []).map((item) => {
+            {(metrics?.ticketsByCategory || []).map((item, i) => {
               const percentage = Math.min((item.count / (summary.totalTickets || 1)) * 100, 100)
               return (
-                <div key={item.category} className="group">
+                <Motion.div 
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 + (i * 0.05) }}
+                  key={item.category} 
+                  className="group"
+                >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-medium text-slate-600 truncate max-w-[140px]">{item.category}</span>
                     <span className="text-xs font-bold text-slate-800">{item.count}</span>
                   </div>
                   <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-slate-700 rounded-full transition-all duration-700 ease-out group-hover:bg-slate-800"
-                      style={{ width: `${percentage}%` }}
+                    <Motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${percentage}%` }}
+                      transition={{ duration: 1, ease: "easeOut", delay: 0.3 }}
+                      className="h-full bg-slate-700 rounded-full group-hover:bg-slate-800"
                     />
                   </div>
-                </div>
+                </Motion.div>
               )
             })}
           </div>
@@ -148,7 +185,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="space-y-5">
-            {(metrics?.ticketsByStatus || []).map((item) => {
+            {(metrics?.ticketsByStatus || []).map((item, i) => {
               const percentage = Math.min((item.count / (summary.totalTickets || 1)) * 100, 100)
               const statusLabels = {
                 OPEN: 'Abierto',
@@ -159,18 +196,26 @@ export default function AdminDashboard() {
                 CLOSED: 'Cerrado',
               }
               return (
-                <div key={item.status} className="group">
+                <Motion.div 
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 + (i * 0.05) }}
+                  key={item.status} 
+                  className="group"
+                >
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs font-medium text-slate-600">{statusLabels[item.status] || item.status}</span>
                     <span className="text-xs font-bold text-slate-800">{item.count}</span>
                   </div>
                   <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-slate-700 rounded-full transition-all duration-700 ease-out group-hover:bg-slate-800"
-                      style={{ width: `${percentage}%` }}
+                    <Motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${percentage}%` }}
+                      transition={{ duration: 1, ease: "easeOut", delay: 0.3 }}
+                      className="h-full bg-slate-700 rounded-full group-hover:bg-slate-800"
                     />
                   </div>
-                </div>
+                </Motion.div>
               )
             })}
           </div>

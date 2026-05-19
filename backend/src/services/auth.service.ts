@@ -153,7 +153,6 @@ async function registerPublic(data: {
   };
 }
 
-export const authService = { login, register, registerPublic, getProfile, changePassword };
 
 async function getProfile(userId: string) {
   const user = await prisma.user.findUnique({
@@ -209,3 +208,4 @@ async function changePassword(userId: string, currentPassword: string, newPasswo
   return { message: 'Contraseña actualizada correctamente' };
 }
 
+export const authService = { login, register, registerPublic, getProfile, changePassword };
