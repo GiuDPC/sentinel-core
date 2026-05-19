@@ -3,6 +3,7 @@ import { usersApi } from '../../api/users'
 import notifications from '../../components/ui/Notifications'
 import { Search, Filter, X, ChevronLeft, ChevronRight, Shield } from 'lucide-react'
 import { ROLE_LABELS, ROLE_COLORS, ROLE_OPTIONS } from '../../constants/roles'
+import UserDetailModal from '../../components/dashboard/UserDetailModal'
 
 const STATUS_OPTIONS = [
   { value: 'active', label: 'Activo' },
@@ -15,6 +16,8 @@ export default function UserManagement() {
   const [filters, setFilters] = useState({ search: '', role: '', status: '' })
   const [openFilter, setOpenFilter] = useState(null)
   const [pagination, setPagination] = useState({ page: 1, limit: 8 })
+  const [selectedUser, setSelectedUser] = useState(null)
+  const [showUserDetail, setShowUserDetail] = useState(false)
 
   // Cargar usuarios
   async function loadUsers() {
@@ -252,7 +255,7 @@ export default function UserManagement() {
                   const roleLabel = ROLE_LABELS[roleName] || roleName
                   const roleColor = ROLE_COLORS[roleName] || 'bg-gray-100 text-gray-600'
                   return (
-                    <tr key={user.id} className="hover:bg-slate-50/80 transition-all group cursor-pointer">
+                    <tr key={user.id} onClick={() => { setSelectedUser(user); setShowUserDetail(true) }} className="hover:bg-slate-50/80 transition-all group cursor-pointer">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-gray-200 text-black flex items-center justify-center text-xs font-semibold">
@@ -322,6 +325,13 @@ export default function UserManagement() {
           </>
         )}
       </div>
+
+      {/* Modal de Detalle de Usuario */}
+      <UserDetailModal
+        show={showUserDetail}
+        onClose={() => setShowUserDetail(false)}
+        user={selectedUser}
+      />
     </div>
   )
 }

@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { auditApi } from '../../api/audit'
 import { Search, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import AuditDetailModal from '../../components/dashboard/AuditDetailModal'
 
 const ACTION_LABELS = {
   TICKET_CREATED: { label: 'Ticket Creado', color: 'bg-blue-50 text-blue-700' },
   STATUS_CHANGE: { label: 'Cambio de Estado', color: 'bg-amber-50 text-amber-700' },
   ASSIGNMENT: { label: 'Asignación', color: 'bg-purple-50 text-purple-700' },
+  REASSIGNMENT: { label: 'Reasignación', color: 'bg-purple-50 text-purple-700' },
   RESOLUTION_NOTE: { label: 'Nota de Resolución', color: 'bg-emerald-50 text-emerald-700' },
   TICKET_CONFIRMED: { label: 'Confirmado', color: 'bg-green-50 text-green-700' },
   TICKET_REOPENED: { label: 'Reabierto', color: 'bg-rose-50 text-rose-700' },
@@ -15,6 +17,7 @@ const ACTION_OPTIONS = [
   { value: 'TICKET_CREATED', label: 'Ticket Creado' },
   { value: 'STATUS_CHANGE', label: 'Cambio de Estado' },
   { value: 'ASSIGNMENT', label: 'Asignación' },
+  { value: 'REASSIGNMENT', label: 'Reasignación' },
   { value: 'RESOLUTION_NOTE', label: 'Nota de Resolución' },
   { value: 'TICKET_CONFIRMED', label: 'Confirmado' },
   { value: 'TICKET_REOPENED', label: 'Reabierto' },
@@ -22,6 +25,13 @@ const ACTION_OPTIONS = [
 
 const formatValue = (value) => {
   if (!value || value === '-') return '-'
+  
+  // Format long UUIDs (only if it matches UUID format)
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (uuidRegex.test(value)) {
+    return `${value.substring(0, 8)}...${value.substring(value.length - 4)}`
+  }
+  
   const labels = {
     OPEN: 'Abierto',
     ASSIGNED: 'Asignado',
@@ -44,6 +54,8 @@ export default function AuditLogs() {
   const [filters, setFilters] = useState({ search: '', action: '' })
   const [openFilter, setOpenFilter] = useState(null)
   const [pagination, setPagination] = useState({ page: 1, limit: 8 })
+  const [selectedLog, setSelectedLog] = useState(null)
+  const [showLogDetail, setShowLogDetail] = useState(false)
 
   // DEFINIR loadLogs ANTES del useEffect
   const loadLogs = useCallback(async () => {
@@ -213,7 +225,7 @@ export default function AuditLogs() {
                 {filteredLogs.map((log) => {
                   const actionConfig = ACTION_LABELS[log.action] || { label: log.action, color: 'bg-gray-100 text-gray-600' }
                   return (
-                    <tr key={log.id} className="hover:bg-slate-50/80 transition-all group">
+                    <tr key={log.id} onClick={() => { setSelectedLog(log); setShowLogDetail(true) }} className="hover:bg-slate-50/80 transition-all group cursor-pointer">
                       <td className="px-6 py-4 text-xs text-slate-500">
                         {new Date(log.createdAt).toLocaleString('es-VE', {
                           day: '2-digit', month: '2-digit', year: 'numeric',
@@ -275,6 +287,13 @@ export default function AuditLogs() {
           </>
         )}
       </div>
+
+      {/* Modal de Detalle de Auditoría */}
+      <AuditDetailModal
+        show={showLogDetail}
+        onClose={() => setShowLogDetail(false)}
+        log={selectedLog}
+      />
     </div>
   )
 }
