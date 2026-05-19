@@ -38,8 +38,9 @@ const VALUE_LABELS = {
 function formatValue(value) {
   if (!value || value === '-') return null
   
-  // Format long UUIDs
-  if (value.length > 30 && value.includes('-')) {
+  // Format long UUIDs (only if it matches UUID format)
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (uuidRegex.test(value)) {
     return `${value.substring(0, 8)}...${value.substring(value.length - 4)}`
   }
   
