@@ -42,6 +42,7 @@ async function login(email: string, password: string) {
       phone: user.phone,
       storeNumber: user.storeNumber,
       storeName: user.storeName,
+      createdAt: user.createdAt,
     },
   };
 }
@@ -95,6 +96,7 @@ async function register(data: {
     lastName: user.lastName,
     email: user.email,
     role: user.role.name,
+    createdAt: user.createdAt,
   };
 }
 
@@ -147,6 +149,7 @@ async function registerPublic(data: {
     lastName: user.lastName,
     email: user.email,
     role: user.role.name,
+    createdAt: user.createdAt,
   };
 }
 
@@ -172,6 +175,7 @@ async function getProfile(userId: string) {
     phone: user.phone,
     storeNumber: user.storeNumber,
     storeName: user.storeName,
+    createdAt: user.createdAt,
   };
 }
 

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ticketsApi } from '../../api/tickets'
-import { PRIORITY_LABELS, PRIORITY_COLORS, AUDIT_ACTION_LABELS } from '../../constants/ticket'
+import { PRIORITY_LABELS, PRIORITY_COLORS, AUDIT_ACTION_LABELS, STATUS_LABELS } from '../../constants/ticket'
 import StatusBadge from '../../components/dashboard/StatusBadge'
 import PriorityBadge from '../../components/dashboard/PriorityBadge'
 import AnimatedModal from '../../components/ui/AnimatedModal'
@@ -212,7 +212,7 @@ return (
                   <>
                     <div className='mx-2 h-4 w-px bg-slate-200' />
                     <span className='rounded-sm bg-slate-100 px-1 text-[10px] font-normal text-blue-950 uppercase'>
-                      {filters.status}
+                      {STATUS_LABELS[filters.status] || filters.status}
                     </span>
                   </>
                 )}
@@ -274,7 +274,7 @@ return (
                   <>
                     <div className='mx-2 h-4 w-px bg-slate-200' />
                     <span className='rounded-sm bg-slate-100 px-1 text-[10px] font-normal text-blue-950 uppercase'>
-                      {filters.priority}
+                      {PRIORITY_LABELS[filters.priority] || filters.priority}
                     </span>
                   </>
                 )}

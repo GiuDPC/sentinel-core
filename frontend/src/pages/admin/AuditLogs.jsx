@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { auditApi } from '../../api/audit'
 import { Search, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import AuditDetailModal from '../../components/dashboard/AuditDetailModal'
 
 const ACTION_LABELS = {
   TICKET_CREATED: { label: 'Ticket Creado', color: 'bg-blue-50 text-blue-700' },
@@ -44,6 +45,8 @@ export default function AuditLogs() {
   const [filters, setFilters] = useState({ search: '', action: '' })
   const [openFilter, setOpenFilter] = useState(null)
   const [pagination, setPagination] = useState({ page: 1, limit: 8 })
+  const [selectedLog, setSelectedLog] = useState(null)
+  const [showLogDetail, setShowLogDetail] = useState(false)
 
   // DEFINIR loadLogs ANTES del useEffect
   const loadLogs = useCallback(async () => {
@@ -213,7 +216,7 @@ export default function AuditLogs() {
                 {filteredLogs.map((log) => {
                   const actionConfig = ACTION_LABELS[log.action] || { label: log.action, color: 'bg-gray-100 text-gray-600' }
                   return (
-                    <tr key={log.id} className="hover:bg-slate-50/80 transition-all group">
+                    <tr key={log.id} onClick={() => { setSelectedLog(log); setShowLogDetail(true) }} className="hover:bg-slate-50/80 transition-all group cursor-pointer">
                       <td className="px-6 py-4 text-xs text-slate-500">
                         {new Date(log.createdAt).toLocaleString('es-VE', {
                           day: '2-digit', month: '2-digit', year: 'numeric',
@@ -275,6 +278,13 @@ export default function AuditLogs() {
           </>
         )}
       </div>
+
+      {/* Modal de Detalle de Auditoría */}
+      <AuditDetailModal
+        show={showLogDetail}
+        onClose={() => setShowLogDetail(false)}
+        log={selectedLog}
+      />
     </div>
   )
 }

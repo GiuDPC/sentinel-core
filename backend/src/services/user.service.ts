@@ -4,7 +4,10 @@ import { Department } from '../../generated/prisma/index.js';
 
 async function findAll() {
   const users = await prisma.user.findMany({
-    include: { role: true },
+    include: {
+      role: true,
+      _count: { select: { tickets: true, assignments: true } },
+    },
     orderBy: { createdAt: 'desc' },
   });
 
@@ -117,6 +120,7 @@ async function updateProfile(id: string, data: {
     phone: updated.phone,
     storeNumber: updated.storeNumber,
     storeName: updated.storeName,
+    createdAt: updated.createdAt,
   };
 }
 
