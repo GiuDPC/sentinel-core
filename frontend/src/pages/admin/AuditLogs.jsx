@@ -7,6 +7,7 @@ const ACTION_LABELS = {
   TICKET_CREATED: { label: 'Ticket Creado', color: 'bg-blue-50 text-blue-700' },
   STATUS_CHANGE: { label: 'Cambio de Estado', color: 'bg-amber-50 text-amber-700' },
   ASSIGNMENT: { label: 'Asignación', color: 'bg-purple-50 text-purple-700' },
+  REASSIGNMENT: { label: 'Reasignación', color: 'bg-purple-50 text-purple-700' },
   RESOLUTION_NOTE: { label: 'Nota de Resolución', color: 'bg-emerald-50 text-emerald-700' },
   TICKET_CONFIRMED: { label: 'Confirmado', color: 'bg-green-50 text-green-700' },
   TICKET_REOPENED: { label: 'Reabierto', color: 'bg-rose-50 text-rose-700' },
@@ -16,6 +17,7 @@ const ACTION_OPTIONS = [
   { value: 'TICKET_CREATED', label: 'Ticket Creado' },
   { value: 'STATUS_CHANGE', label: 'Cambio de Estado' },
   { value: 'ASSIGNMENT', label: 'Asignación' },
+  { value: 'REASSIGNMENT', label: 'Reasignación' },
   { value: 'RESOLUTION_NOTE', label: 'Nota de Resolución' },
   { value: 'TICKET_CONFIRMED', label: 'Confirmado' },
   { value: 'TICKET_REOPENED', label: 'Reabierto' },
@@ -23,6 +25,11 @@ const ACTION_OPTIONS = [
 
 const formatValue = (value) => {
   if (!value || value === '-') return '-'
+  
+  if (value.length > 30 && value.includes('-')) {
+    return `${value.substring(0, 8)}...${value.substring(value.length - 4)}`
+  }
+  
   const labels = {
     OPEN: 'Abierto',
     ASSIGNED: 'Asignado',

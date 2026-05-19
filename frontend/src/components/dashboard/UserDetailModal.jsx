@@ -40,7 +40,6 @@ export default function UserDetailModal({ show, onClose, user }) {
   }
 
   const ticketCount = user._count?.tickets ?? 0
-  const assignmentCount = user._count?.assignments ?? 0
 
   return (
     <AnimatedModal show={show} onClose={onClose} className="w-full max-w-2xl mx-4">
@@ -78,7 +77,7 @@ export default function UserDetailModal({ show, onClose, user }) {
         {/* Content */}
         <div className="max-h-[65vh] overflow-y-auto">
           {/* Stats bar */}
-          <div className="grid grid-cols-4 border-b border-slate-100">
+          <div className="grid grid-cols-3 border-b border-slate-100">
             <div className="px-4 py-3 text-center border-r border-slate-100">
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Estado</p>
               <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
@@ -90,10 +89,6 @@ export default function UserDetailModal({ show, onClose, user }) {
             <div className="px-4 py-3 text-center border-r border-slate-100">
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Tickets Creados</p>
               <p className="text-lg font-bold text-slate-900">{ticketCount}</p>
-            </div>
-            <div className="px-4 py-3 text-center border-r border-slate-100">
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Asignaciones</p>
-              <p className="text-lg font-bold text-slate-900">{assignmentCount}</p>
             </div>
             <div className="px-4 py-3 text-center">
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Rol</p>
@@ -178,21 +173,16 @@ export default function UserDetailModal({ show, onClose, user }) {
               <Ticket className="w-3.5 h-3.5" />
               Actividad en el Sistema
             </h4>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="bg-blue-50 rounded-xl p-3 text-center border border-blue-100">
-                <Ticket className="w-4 h-4 text-blue-500 mx-auto mb-1" />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-blue-50 rounded-xl p-3 text-center border border-blue-100 flex flex-col items-center justify-center h-full">
+                <Ticket className="w-4 h-4 text-blue-500 mb-1" />
                 <p className="text-lg font-bold text-blue-700">{ticketCount}</p>
                 <p className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">Tickets Creados</p>
               </div>
-              <div className="bg-purple-50 rounded-xl p-3 text-center border border-purple-100">
-                <Wrench className="w-4 h-4 text-purple-500 mx-auto mb-1" />
-                <p className="text-lg font-bold text-purple-700">{assignmentCount}</p>
-                <p className="text-[9px] font-bold text-purple-500 uppercase tracking-widest">Asignaciones</p>
-              </div>
-              <div className="bg-slate-50 rounded-xl p-3 text-center border border-slate-100">
-                <Calendar className="w-4 h-4 text-slate-400 mx-auto mb-1" />
+              <div className="bg-slate-50 rounded-xl p-3 text-center border border-slate-100 flex flex-col items-center justify-center h-full">
+                <Calendar className="w-4 h-4 text-slate-400 mb-1" />
                 <p className="text-xs font-bold text-slate-700 mt-1">{formatDate(user.createdAt)}</p>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Registro</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Fecha de Registro</p>
               </div>
             </div>
           </div>
@@ -214,6 +204,13 @@ export default function UserDetailModal({ show, onClose, user }) {
                   <p className="text-[10px] font-bold text-slate-500">{formatDateTime(user.updatedAt)}</p>
                 </div>
               </div>
+            </div>
+            
+            <div className="mt-4 pt-4 border-t border-slate-200/50 flex items-center justify-center gap-2">
+              <Hash className="w-3.5 h-3.5 text-slate-300" />
+              <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">
+                ID DE USUARIO: <span className="font-mono text-slate-400">{user.id ? `${user.id.substring(0, 8)}...${user.id.substring(user.id.length - 4)}` : 'N/A'}</span>
+              </p>
             </div>
           </div>
         </div>

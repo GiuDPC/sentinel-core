@@ -5,6 +5,7 @@ const ACTION_LABELS = {
   TICKET_CREATED: { label: 'Ticket Creado', color: 'bg-blue-50 text-blue-700' },
   STATUS_CHANGE: { label: 'Cambio de Estado', color: 'bg-amber-50 text-amber-700' },
   ASSIGNMENT: { label: 'Asignación', color: 'bg-purple-50 text-purple-700' },
+  REASSIGNMENT: { label: 'Reasignación', color: 'bg-purple-50 text-purple-700' },
   RESOLUTION_NOTE: { label: 'Nota de Resolución', color: 'bg-emerald-50 text-emerald-700' },
   TICKET_CONFIRMED: { label: 'Confirmado', color: 'bg-green-50 text-green-700' },
   TICKET_REOPENED: { label: 'Reabierto', color: 'bg-rose-50 text-rose-700' },
@@ -13,7 +14,8 @@ const ACTION_LABELS = {
 const ACTION_DESCRIPTIONS = {
   TICKET_CREATED: 'Se registró un nuevo ticket en el sistema.',
   STATUS_CHANGE: 'Se modificó el estado del ticket.',
-  ASSIGNMENT: 'Se asignó o reasignó un técnico al ticket.',
+  ASSIGNMENT: 'Se asignó un técnico al ticket.',
+  REASSIGNMENT: 'Se reasignó el ticket a un nuevo técnico.',
   RESOLUTION_NOTE: 'El técnico añadió una nota de resolución al ticket.',
   TICKET_CONFIRMED: 'El solicitante confirmó que la resolución fue satisfactoria.',
   TICKET_REOPENED: 'El solicitante reabrió el ticket por una solución insatisfactoria.',
@@ -35,6 +37,12 @@ const VALUE_LABELS = {
 
 function formatValue(value) {
   if (!value || value === '-') return null
+  
+  // Format long UUIDs
+  if (value.length > 30 && value.includes('-')) {
+    return `${value.substring(0, 8)}...${value.substring(value.length - 4)}`
+  }
+  
   return VALUE_LABELS[value] || value
 }
 
