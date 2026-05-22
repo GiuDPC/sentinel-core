@@ -1,7 +1,9 @@
 import logoDashboard from '../../assets/Logo_Claro-fOscuro.jpg'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../Contexts/AuthContextObject.js'
-import { motion as Motion } from 'framer-motion'
+import { useSidebar } from '../../Contexts/SidebarContext.jsx'
+import { motion as Motion, AnimatePresence } from 'framer-motion'
+import { X } from 'lucide-react'
 
 /** Configuracion de navegacion por rol */
 const NAV_ITEMS = [
@@ -87,7 +89,7 @@ const ICONS = {
 
 import { ROLE_LABELS } from '../../constants/roles'
 
-export default function Sidebar() {
+function SidebarContent({ onNavClick }) {
   const { user, logout, hasRole } = useAuth()
   const navigate = useNavigate()
 
@@ -99,7 +101,7 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-64 fixed inset-y-0 left-0 h-screen bg-gray-50 flex flex-col z-30">
+    <>
       {/* Logo */}
       <div className="p-5 border-b border-gray-100">
         <div className="flex items-center gap-3">
@@ -132,6 +134,7 @@ export default function Sidebar() {
             >
               <NavLink
                 to={item.path}
+                onClick={onNavClick}
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors active:scale-[0.97] ${
                     isActive
@@ -169,6 +172,53 @@ export default function Sidebar() {
           Cerrar Sesión
         </button>
       </div>
-    </aside>
+    </>
+  )
+}
+
+export default function Sidebar() {
+  const { isOpen, close } = useSidebar()
+
+  return (
+    <>
+      {/* Desktop sidebar — always visible on lg+ */}
+      <aside className="hidden lg:flex w-64 fixed inset-y-0 left-0 h-screen bg-gray-50 flex-col z-30">
+        <SidebarContent />
+      </aside>
+
+      {/* Mobile drawer overlay — visible only when open on < lg */}
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Backdrop */}
+            <Motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={close}
+              className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden"
+            />
+            {/* Drawer */}
+            <Motion.aside
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-gray-50 flex flex-col z-50 lg:hidden shadow-2xl"
+            >
+              {/* Close button */}
+              <button
+                onClick={close}
+                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors z-10"
+              >
+                <X size={18} />
+              </button>
+              <SidebarContent onNavClick={close} />
+            </Motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   )
 }

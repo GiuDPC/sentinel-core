@@ -479,12 +479,12 @@ export default function MyTickets() {
             ) : null}
             
             {/* Metadata */}
-            <div className="grid grid-cols-4 border-b border-slate-100">
-              <div className="px-4 py-3 border-r border-slate-100">
+            <div className="grid grid-cols-2 sm:grid-cols-4 border-b border-slate-100">
+              <div className="px-4 py-3 border-r border-b sm:border-b-0 border-slate-100">
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Categoría</p>
                 <p className="text-xs font-bold text-slate-900">{selectedTicket?.category?.name || 'General'}</p>
               </div>
-              <div className="px-4 py-3 border-r border-slate-100">
+              <div className="px-4 py-3 sm:border-r border-b sm:border-b-0 border-slate-100">
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Prioridad</p>
                 <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                   selectedTicket?.priority === 'LOW' ? 'bg-slate-100 text-slate-600' :
