@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../Contexts/AuthContextObject.js'
+import { useSidebar } from '../../Contexts/SidebarContext.jsx'
 import { useNotificationStore } from '../../store/useNotificationStore.js'
-import { Bell, Search } from 'lucide-react'
+import { Bell, Search, Menu } from 'lucide-react'
 import { motion as Motion, AnimatePresence } from 'framer-motion'
 
 const NotificationBell = () => {
@@ -82,6 +83,7 @@ const NotificationBell = () => {
 
 export default function Header() {
   const { user } = useAuth()
+  const { toggle } = useSidebar()
   const { startPolling, stopPolling } = useNotificationStore()
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
@@ -116,22 +118,30 @@ export default function Header() {
   }
 
   return (
-    <header className="h-14 flex shrink-0 items-center justify-between px-8 bg-white/50 backdrop-blur-md border-b border-slate-100 z-10 sticky top-0">
-      <div>
-        <h1 className="text-xl font-bold text-slate-900 font-display tracking-tight">
+    <header className="h-14 flex shrink-0 items-center justify-between px-4 sm:px-6 lg:px-8 bg-white/50 backdrop-blur-md border-b border-slate-100 z-10 sticky top-0">
+      <div className="flex items-center gap-3">
+        {/* Hamburger — only on mobile */}
+        <button
+          onClick={toggle}
+          className="lg:hidden w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600 transition-colors"
+          aria-label="Toggle sidebar"
+        >
+          <Menu size={20} />
+        </button>
+        <h1 className="text-base sm:text-xl font-bold text-slate-900 font-display tracking-tight truncate">
           {greeting}, {user?.firstName}!  
         </h1>
       </div>
 
-      <div className="flex items-center gap-5">
-        <div className="relative group">
+      <div className="flex items-center gap-3 sm:gap-5">
+        <div className="relative group hidden sm:block">
           <input
             type="text"
             placeholder="Buscar tickets..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleSearch}
-            className="w-56 h-9 pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300 transition-all shadow-sm"
+            className="w-40 md:w-56 h-9 pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300 transition-all shadow-sm"
           />
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-slate-600 transition-colors" />
         </div>

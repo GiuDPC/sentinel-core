@@ -57,14 +57,27 @@ export default function LiveTracker({ ticketCode, title, currentStatus, technici
         </div>
       )}
 
-      <div className="flex items-center justify-between relative px-2 pt-2">
-        <div className="absolute top-6 left-10 right-10 h-1 bg-slate-100 rounded-full" />
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between relative px-2 pt-2 gap-6 md:gap-0">
+        {/* Horizontal background line (desktop) */}
+        <div className="absolute top-6 left-10 right-10 h-1 hidden md:block bg-slate-100 rounded-full" />
         
+        {/* Horizontal active line (desktop) */}
         <Motion.div
           initial={{ width: 0 }}
           animate={{ width: `calc(${(currentIndex / (STEPS.length - 1)) * 100}% - ${(currentIndex / (STEPS.length - 1)) * 40}px)` }}
           transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
-          className="absolute top-6 left-10 h-1 bg-blue-950 rounded-full"
+          className="absolute top-6 left-10 h-1 hidden md:block bg-blue-950 rounded-full"
+        />
+
+        {/* Vertical background line (mobile) */}
+        <div className="absolute top-4 left-[1.625rem] bottom-4 w-1 md:hidden block bg-slate-100 rounded-full" />
+        
+        {/* Vertical active line (mobile) */}
+        <Motion.div
+          initial={{ height: 0 }}
+          animate={{ height: `calc(${(currentIndex / (STEPS.length - 1)) * 100}% - 8px)` }}
+          transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
+          className="absolute top-4 left-[1.625rem] w-1 md:hidden block bg-blue-950 rounded-full"
         />
 
         {STEPS.map((step, i) => {
@@ -73,13 +86,13 @@ export default function LiveTracker({ ticketCode, title, currentStatus, technici
           const isPending = i > currentIndex
 
           return (
-            <div key={step} className="relative flex flex-col items-center z-10 w-24">
+            <div key={step} className="relative flex flex-row md:flex-col items-center gap-4 md:gap-0 z-10 w-full md:w-24 pl-2 md:pl-0">
               <div
-                className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-500 ${
+                className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all duration-500 ${
                   isCompleted
                     ? 'bg-blue-950 text-white shadow-lg shadow-blue-900/20'
                     : isCurrent
-                      ? 'bg-white border-4 border-blue-950 text-blue-950 scale-125 shadow-xl shadow-blue-900/10'
+                      ? 'bg-white border-4 border-blue-950 text-blue-950 scale-110 md:scale-125 shadow-xl shadow-blue-900/10'
                       : 'bg-white border-2 border-slate-200 text-slate-400'
                 }`}
               >
@@ -88,18 +101,25 @@ export default function LiveTracker({ ticketCode, title, currentStatus, technici
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                   </svg>
                 ) : isCurrent ? (
-                   <div className="w-2.5 h-2.5 rounded-full bg-blue-950 animate-pulse" />
+                   <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-blue-950 animate-pulse" />
                 ) : (
                   <span className="text-xs">{i + 1}</span>
                 )}
               </div>
-              <span
-                className={`mt-4 text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 text-center ${
-                  isPending ? 'text-slate-300' : isCurrent ? 'text-blue-950' : 'text-slate-500'
-                }`}
-              >
-                {STATUS_LABELS[step]}
-              </span>
+              <div className="flex flex-col items-start md:items-center text-left md:text-center mt-0 md:mt-4">
+                <span
+                  className={`text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 ${
+                    isPending ? 'text-slate-300' : isCurrent ? 'text-blue-950 font-black' : 'text-slate-500'
+                  }`}
+                >
+                  {STATUS_LABELS[step]}
+                </span>
+                {isCurrent && (
+                  <span className="text-[9px] text-slate-400 font-medium lowercase md:hidden">
+                    en curso
+                  </span>
+                )}
+              </div>
             </div>
           )
         })}

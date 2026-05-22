@@ -610,7 +610,7 @@ return (
 
       {/* Modal Detalle de Ticket (Admin) */}
       <AnimatedModal show={detailModal} onClose={() => setDetailModal(false)}>
-        <div className="bg-white rounded-[32px] shadow-[0_25px_60px_rgba(15,23,42,0.15)] w-[600px] mx-4 overflow-hidden border border-slate-200" style={{ maxHeight: '600px' }}>
+        <div className="bg-white rounded-[32px] shadow-[0_25px_60px_rgba(15,23,42,0.15)] w-full max-w-2xl mx-4 overflow-hidden border border-slate-200" style={{ maxHeight: '90vh' }}>
           {loadingDetail ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <div className="w-8 h-8 border-4 border-slate-100 border-t-blue-600 rounded-full animate-spin" />
@@ -640,16 +640,16 @@ return (
                 </button>
               </div>
 
-              <div className="overflow-y-auto w-full" style={{ maxHeight: '480px' }}>
+              <div className="overflow-y-auto w-full" style={{ maxHeight: 'calc(90vh - 80px)' }}>
                 {/* Metadata Grid */}
-                <div className="grid grid-cols-4 border-b border-slate-100 bg-white">
+                <div className="grid grid-cols-2 sm:grid-cols-4 border-b border-slate-100 bg-white">
                   <div className="px-4 py-3 border-r border-b border-slate-100">
                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Solicitante</p>
                     <p className="text-xs font-bold text-slate-900 truncate">
                       {detailTicket.creator?.firstName} {detailTicket.creator?.lastName}
                     </p>
                   </div>
-                  <div className="px-4 py-3 border-r border-b border-slate-100">
+                  <div className="px-4 py-3 sm:border-r border-b border-slate-100">
                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Categoría</p>
                     <p className="text-xs font-bold text-slate-900 truncate">{detailTicket.category?.name || 'General'}</p>
                   </div>
@@ -669,7 +669,7 @@ return (
                       {PRIORITY_LABELS[detailTicket.priority] || detailTicket.priority}
                     </span>
                   </div>
-                  <div className="px-4 py-3 border-r border-slate-100">
+                  <div className="px-4 py-3 border-r border-b sm:border-b-0 border-slate-100">
                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Técnico</p>
                     <p className="text-xs font-bold text-slate-900 truncate">
                       {detailTicket.assignments?.[0]?.technician
@@ -677,21 +677,21 @@ return (
                         : '—'}
                     </p>
                   </div>
-                  <div className="px-4 py-3 border-r border-slate-100">
+                  <div className="px-4 py-3 sm:border-r border-b sm:border-b-0 border-slate-100">
                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Creado</p>
                     <p className="text-xs font-bold text-slate-900">
                       {new Date(detailTicket.createdAt).toLocaleDateString('es-VE')}
                     </p>
                   </div>
                   {detailTicket.dueDate ? (
-                    <div className="px-4 py-3 border-r border-slate-100 col-span-2 bg-slate-50/50">
+                    <div className="px-4 py-3 col-span-2 bg-slate-50/50">
                       <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">SLA Vencimiento</p>
                       <p className={`text-xs font-bold ${new Date(detailTicket.dueDate) < new Date() ? 'text-rose-600' : 'text-emerald-600'}`}>
                         {new Date(detailTicket.dueDate).toLocaleString('es-VE')}
                       </p>
                     </div>
                   ) : (
-                    <div className="px-4 py-3 col-span-2 border-slate-100 bg-slate-50/30" />
+                    <div className="px-4 py-3 col-span-2 bg-slate-50/30" />
                   )}
                 </div>
 
