@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
+import compression from 'compression';
 import swaggerUi from 'swagger-ui-express';
 import { generateOpenApiConfig } from './docs/swagger.js';
 import routes from './routes/index.js';
@@ -14,6 +15,7 @@ const swaggerDocument = generateOpenApiConfig();
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Middlewares Globales
+app.use(compression());
 app.use(cors({
   origin: env.CORS_ORIGIN,
   credentials: true,

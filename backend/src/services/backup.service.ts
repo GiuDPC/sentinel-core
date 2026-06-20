@@ -23,6 +23,12 @@ export interface BackupMetadata {
   createdAt: string;
 }
 
+function validateFilename(filename: string): void {
+  if (filename.includes('/') || filename.includes('\\') || filename.includes('..')) {
+    throw new AppError(400, 'Nombre de archivo inválido (posible Path Traversal)');
+  }
+}
+
 async function listBackups(): Promise<BackupMetadata[]> {
   const files = fs.readdirSync(BACKUPS_DIR);
   const sqlFiles = files.filter(f => f.endsWith('.sql'));
@@ -66,6 +72,7 @@ async function createBackup(): Promise<BackupMetadata> {
 }
 
 async function restoreBackup(filename: string): Promise<void> {
+  validateFilename(filename);
   const filePath = path.resolve(BACKUPS_DIR, filename);
   
   if (!fs.existsSync(filePath)) {
@@ -90,6 +97,7 @@ async function restoreBackup(filename: string): Promise<void> {
 }
 
 async function deleteBackup(filename: string): Promise<void> {
+  validateFilename(filename);
   const filePath = path.resolve(BACKUPS_DIR, filename);
   if (fs.existsSync(filePath)) {
     fs.unlinkSync(filePath);
@@ -99,6 +107,7 @@ async function deleteBackup(filename: string): Promise<void> {
 }
 
 function getBackupFilePath(filename: string): string {
+  validateFilename(filename);
   const filePath = path.resolve(BACKUPS_DIR, filename);
   if (!fs.existsSync(filePath)) {
     throw new AppError(404, 'El archivo no existe.');

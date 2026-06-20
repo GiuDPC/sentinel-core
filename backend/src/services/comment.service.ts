@@ -1,6 +1,7 @@
 import { prisma } from '../config/prisma.js';
 import { AppError } from '../utils/app-error.js';
 import { notificationService } from './notification.service.js';
+import { sanitizeString } from '../utils/sanitize.js';
 
 async function create(data: {
   ticketId: string;
@@ -20,7 +21,7 @@ async function create(data: {
     data: {
       ticketId: data.ticketId,
       userId: data.userId,
-      content: data.content,
+      content: sanitizeString(data.content),
       isInternal: data.isInternal,
     },
     include: {
