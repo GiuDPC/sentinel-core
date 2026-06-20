@@ -108,7 +108,7 @@ function SidebarContent({ onNavClick }) {
           <img src={logoDashboard} alt="SentinelCore" className="w-10 h-10 rounded-xl" />
           <div>
             <h2 className="font-display text-lg font-bold tracking-tight text-gray-900">SentinelCore</h2>
-            <p className="text-[11px] text-gray-700 uppercase tracking-wider">Centro Comercial</p>
+            <p className="text-[12px] font-bold text-gray-800 uppercase tracking-wider">Centro Comercial</p>
           </div>
         </div>
       </div>
@@ -136,10 +136,10 @@ function SidebarContent({ onNavClick }) {
                 to={item.path}
                 onClick={onNavClick}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors active:scale-[0.97] ${
+                  `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-colors active:scale-[0.97] ${
                     isActive
-                      ? 'bg-slate-200 text-slate-900'
-                      : 'text-slate-600 hover:bg-slate-100'
+                      ? 'bg-slate-800 text-white shadow-md'
+                      : 'text-slate-700 hover:bg-slate-200/70 hover:text-slate-900'
                   }`
                 }
               >
@@ -158,10 +158,10 @@ function SidebarContent({ onNavClick }) {
             {user?.firstName?.[0]}{user?.lastName?.[0]}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate text-gray-800">
+            <p className="text-sm font-bold truncate text-gray-900">
               {user?.firstName} {user?.lastName}
             </p>
-            <p className="text-xs text-gray-400">{ROLE_LABELS[user?.role] || user?.role}</p>
+            <p className="text-xs font-semibold text-gray-600">{ROLE_LABELS[user?.role] || user?.role}</p>
           </div>
         </div>
         <button

@@ -42,3 +42,19 @@
     color: var(--color-text-primary);
   }
 }
+
+@layer utilities {
+  /* Corrección global de accesibilidad y contraste (Ponytail UI fix) */
+  .text-\[10px\] { 
+    font-size: 0.75rem !important; 
+  }
+  .text-xs { 
+    font-size: 0.8125rem !important; 
+  }
+  
+  /* Oscurecer todos los textos grises claros que se usaron en el diseño original */
+  .text-gray-400, .text-slate-400, .text-slate-500 {
+    color: #475569 !important; /* slate-600 */
+    font-weight: 600 !important;
+  }
+}

@@ -106,6 +106,36 @@ async function getDashboard() {
     },
   });
 
+  // ── Tickets agrupados por día de la semana y prioridad (para Recharts)
+  // En vez de usar solo los últimos 7 días estrictos (que dejaría el gráfico plano si no hay actividad reciente),
+  // agrupamos TODOS los tickets por su día de la semana.
+  const allTickets = await prisma.ticket.findMany({
+    select: { priority: true, createdAt: true }
+  });
+
+  const daysLabels = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  const ticketsByDateAndPriority = daysLabels.map(day => ({
+    day, Baja: 0, Media: 0, Alta: 0, Crítica: 0
+  }));
+
+  allTickets.forEach(t => {
+    const dayIndex = t.createdAt.getDay();
+    const dayEntry = ticketsByDateAndPriority[dayIndex];
+    if (t.priority === 'LOW') dayEntry.Baja++;
+    else if (t.priority === 'MEDIUM') dayEntry.Media++;
+    else if (t.priority === 'HIGH') dayEntry.Alta++;
+    else if (t.priority === 'CRITICAL') dayEntry.Crítica++;
+  });
+
+  // Reordenar para que empiece desde hoy hacia atrás 7 días, o de Lunes a Domingo
+  // Para simplificar, lo dejamos de Domingo a Sábado (el map ya lo hizo) o lo rotamos:
+  // Rotar el array para que el día actual quede al final:
+  const todayIndex = now.getDay();
+  const rotatedTickets = [
+    ...ticketsByDateAndPriority.slice(todayIndex + 1),
+    ...ticketsByDateAndPriority.slice(0, todayIndex + 1)
+  ];
+
   return {
     summary: {
       totalTickets,
@@ -123,6 +153,7 @@ async function getDashboard() {
     ticketsByCategory: ticketsByCategoryNamed,
     ticketsByPriority: ticketsByPriorityFormatted,
     ticketsByStatus,
+    ticketsByDateAndPriority: rotatedTickets,
   };
 }
 

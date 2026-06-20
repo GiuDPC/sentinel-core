@@ -17,6 +17,14 @@ const loginLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hora
+  max: 5,
+  message: { error: 'Demasiados registros desde esta IP, por favor intentá en 1 hora' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // POST /api/auth/login — Público (con rate limit estricto)
 router.post('/login', loginLimiter, validate(loginSchema), authController.login);
 
@@ -32,6 +40,7 @@ router.post(
 // POST /api/auth/register-public — Público (solo crea REQUESTER, phone opcional)
 router.post(
   '/register-public',
+  registerLimiter,
   validate(registerPublicSchema),
   authController.registerPublic
 );
