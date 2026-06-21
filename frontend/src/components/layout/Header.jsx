@@ -34,7 +34,7 @@ const NotificationBell = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="absolute right-0 mt-2 w-80 bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.08)] z-50 overflow-hidden origin-top-right"
+            className="fixed top-14 left-4 right-4 sm:absolute sm:top-auto sm:left-auto sm:right-0 mt-2 sm:w-80 bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.08)] z-50 overflow-hidden origin-top sm:origin-top-right"
           >
             <div className="px-5 py-4 border-b border-slate-50 flex items-center justify-between bg-slate-50/80">
               <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Notificaciones</h3>

@@ -52,7 +52,12 @@ export class NotificationService {
   /**
    * Marca una notificación como leída
    */
-  async markAsRead(notificationId: string) {
+  async markAsRead(notificationId: string, userId: string) {
+    // C2: Ownership check — solo el dueño puede marcar su notificación como leída
+    const notification = await prisma.notification.findFirst({
+      where: { id: notificationId, userId },
+    });
+    if (!notification) return null; // No existe o no pertenece al usuario — silencioso
     return await prisma.notification.update({
       where: { id: notificationId },
       data: { isRead: true }
@@ -85,6 +90,21 @@ export class NotificationService {
         })
       )
     )
+  }
+  /**
+   * M5: Limpieza de notificaciones antiguas (> 30 días y leídas).
+   * Llamar al arrancar el servidor y/o con un cron.
+   */
+  async cleanOldNotifications(): Promise<number> {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 30);
+    const result = await prisma.notification.deleteMany({
+      where: {
+        isRead: true,
+        createdAt: { lt: cutoff },
+      },
+    });
+    return result.count;
   }
 }
 

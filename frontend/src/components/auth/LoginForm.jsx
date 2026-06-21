@@ -73,14 +73,7 @@ export default function LoginForm({ onSubmit, onSwitchToRegister, loading }) {
         error={errors.password}
       />
 
-      <div className="flex items-center justify-end">
-        <button 
-          type="button" 
-          className="font-body text-sm text-blue-950 hover:underline focus:outline-none focus:ring-2 focus:ring-[#003091]/20 rounded"
-        >
-          ¿Olvidaste tu contraseña?
-        </button>
-      </div>
+
 
       <Button type="submit" loading={loading} className="mt-3 flex items-center justify-center gap-2">
         <LogIn size={20} className="stroke-white" />

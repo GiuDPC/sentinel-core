@@ -270,17 +270,17 @@ export default function CreateTicket() {
             </div>
 
             {/* Footer de Acciones del Formulario */}
-            <div className="px-8 py-5 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-3 rounded-b-2xl">
+            <div className="px-8 py-5 border-t border-slate-100 bg-slate-50 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 rounded-b-2xl">
               <button
                 onClick={() => navigate('/requester/dashboard')}
-                className="px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-all cursor-pointer flex items-center gap-2"
+                className="w-full sm:w-auto justify-center px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-all cursor-pointer flex items-center gap-2"
               >
                 <X size={16} /> Cancelar
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-white bg-slate-900 shadow-lg shadow-slate-900/20 rounded-xl hover:bg-slate-800 disabled:opacity-50 transition-all cursor-pointer flex items-center gap-2"
+                className="w-full sm:w-auto justify-center px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-white bg-slate-900 shadow-lg shadow-slate-900/20 rounded-xl hover:bg-slate-800 disabled:opacity-50 transition-all cursor-pointer flex items-center gap-2"
               >
                 {loading ? 'Procesando...' : <><Send size={16} /> Enviar Reporte</>}
               </button>

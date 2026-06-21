@@ -1,6 +1,6 @@
 /**
  * Utilidad para sanitizar input de usuario y prevenir XSS.
- * Escapa caracteres HTMLproblemáticos.
+ * Escapa caracteres HTML problemáticos.
  */
 
 const ESCAPE_MAP: Record<string, string> = {
@@ -13,8 +13,8 @@ const ESCAPE_MAP: Record<string, string> = {
 }
 
 /**
- * Sana un string para prevenir XSS.
- * Convierte caracteres problemáticos en sus entidades HTML equivalents.
+ * Sanitiza un string para prevenir XSS.
+ * Convierte caracteres problemáticos en sus entidades HTML equivalentes.
  */
 export function sanitizeString(input: string): string {
   if (!input || typeof input !== 'string') return ''
@@ -22,56 +22,15 @@ export function sanitizeString(input: string): string {
 }
 
 /**
- * Sana un objeto recursivamente.
- * Útil para sanitizar todo el body de una request.
+ * Sanitiza los campos de texto de un ticket (title, description, location, resolutionNote).
  */
-export function sanitizeObject<T extends Record<string, any>>(obj: T): T {
-  if (!obj || typeof obj !== 'object') return obj
-
-  const result: any = Array.isArray(obj) ? [] : {}
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      const value = obj[key]
-      if (typeof value === 'string') {
-        result[key] = sanitizeString(value)
-      } else if (Array.isArray(value)) {
-        result[key] = value.map((item: any) =>
-          typeof item === 'string' ? sanitizeString(item) : item
-        )
-      } else if (typeof value === 'object' && value !== null) {
-        result[key] = sanitizeObject(value)
-      } else {
-        result[key] = value
-      }
-    }
-  }
-  return result
-}
-
-/**
- * Campos que deben ser sanitizados en tickets.
- */
-export const TICKET_SANITIZE_FIELDS = [
-  'title',
-  'description',
-  'location',
-  'resolutionNote',
-] as const
-
-/**
- * Sana los campos relevantes de un ticket.
- */
-export function sanitizeTicketInput(input: {
-  title?: string
-  description?: string
-  location?: string
-  resolutionNote?: string
-}) {
-  const sanitized: any = { ...input }
-  for (const field of TICKET_SANITIZE_FIELDS) {
+export function sanitizeTicketInput<T extends Record<string, any>>(input: T): T {
+  const fields = ['title', 'description', 'location', 'resolutionNote'] as const
+  const sanitized = { ...input } as any
+  for (const field of fields) {
     if (sanitized[field] && typeof sanitized[field] === 'string') {
       sanitized[field] = sanitizeString(sanitized[field])
     }
   }
-  return sanitized
+  return sanitized as T
 }

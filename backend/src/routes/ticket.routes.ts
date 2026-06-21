@@ -75,8 +75,10 @@ router.post(
   ticketController.confirmTicket
 );
 
+// H1: Closure report accesible solo por roles con acceso al ticket (Admin, Technician, Requester del ticket)
 router.get(
   '/:id/closure-report',
+  roleGuard('ADMIN', 'TECHNICIAN', 'REQUESTER'),
   ticketController.getClosureReport
 );
 

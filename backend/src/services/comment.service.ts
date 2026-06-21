@@ -6,22 +6,38 @@ import { sanitizeString } from '../utils/sanitize.js';
 async function create(data: {
   ticketId: string;
   userId: string;
+  userRole: string;
   content: string;
   isInternal: boolean;
 }) {
   const ticket = await prisma.ticket.findUnique({
     where: { id: data.ticketId },
+    include: { assignments: true },
   });
   if (!ticket) {
     throw new AppError(404, 'Ticket no encontrado');
   }
+
+  // H2: Verificar acceso al ticket según rol
+  if (data.userRole === 'REQUESTER' && ticket.creatorId !== data.userId) {
+    throw new AppError(403, 'Solo podés comentar en tus propios tickets');
+  }
+  if (data.userRole === 'TECHNICIAN') {
+    const isAssigned = ticket.assignments.some((a) => a.technicianId === data.userId);
+    if (!isAssigned) {
+      throw new AppError(403, 'Solo podés comentar en tickets asignados a vos');
+    }
+  }
+
+  // H2: REQUESTER nunca puede crear comentarios internos — forzar a false
+  const isInternal = data.userRole === 'REQUESTER' ? false : (data.isInternal ?? false);
 
   const comment = await prisma.comment.create({
     data: {
       ticketId: data.ticketId,
       userId: data.userId,
       content: sanitizeString(data.content),
-      isInternal: data.isInternal,
+      isInternal,
     },
     include: {
       user: {
@@ -30,32 +46,25 @@ async function create(data: {
     },
   });
 
-  const ticketInfo = await prisma.ticket.findUnique({
-    where: { id: data.ticketId },
-    include: { assignments: true }
-  });
-
-  if (ticketInfo) {
-    if (data.userId === ticketInfo.creatorId) {
-      for (const assignment of ticketInfo.assignments) {
-        await notificationService.createNotification({
-          userId: assignment.technicianId,
-          title: 'Nuevo Comentario de Locatario',
-          message: `El locatario ha comentado en el ticket #${ticketInfo.ticketCode}`,
-          type: 'COMMENT',
-          link: `/technician/ticket/${data.ticketId}`
-        });
-      }
-    } 
-    else if (!data.isInternal) {
+  // Notificaciones: reutilizar ticketInfo ya cargado
+  if (data.userId === ticket.creatorId) {
+    for (const assignment of ticket.assignments) {
       await notificationService.createNotification({
-        userId: ticketInfo.creatorId,
-        title: 'Nuevo Comentario Técnico',
-        message: `Hay una nueva respuesta en tu ticket #${ticketInfo.ticketCode}`,
+        userId: assignment.technicianId,
+        title: 'Nuevo Comentario de Locatario',
+        message: `El locatario ha comentado en el ticket #${ticket.ticketCode}`,
         type: 'COMMENT',
-        link: `/requester/my-tickets?ticketId=${data.ticketId}`
+        link: `/technician/ticket/${data.ticketId}`
       });
     }
+  } else if (!isInternal) {
+    await notificationService.createNotification({
+      userId: ticket.creatorId,
+      title: 'Nuevo Comentario Técnico',
+      message: `Hay una nueva respuesta en tu ticket #${ticket.ticketCode}`,
+      type: 'COMMENT',
+      link: `/requester/my-tickets?ticketId=${data.ticketId}`
+    });
   }
 
   return comment;

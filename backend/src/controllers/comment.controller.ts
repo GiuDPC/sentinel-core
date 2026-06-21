@@ -6,6 +6,7 @@ async function create(req: Request, res: Response, next: NextFunction) {
     const comment = await commentService.create({
       ticketId: String(req.params.ticketId),
       userId: req.user!.id,
+      userRole: req.user!.role, // H2: necesario para ownership y bloqueo de isInternal
       content: req.body.content,
       isInternal: req.body.isInternal,
     });
