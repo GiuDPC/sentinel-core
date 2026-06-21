@@ -453,9 +453,8 @@ export default function MyTickets() {
       <AnimatedModal
         show={showDetails}
         onClose={() => setShowDetails(false)}
-        className="w-full max-w-2xl mx-4"
       >
-        <div className="bg-white rounded-2xl overflow-hidden border border-slate-200">
+        <div className="bg-white rounded-2xl overflow-hidden border border-slate-200 w-[calc(100vw-2rem)] md:w-full max-w-2xl mx-auto flex flex-col" style={{ maxHeight: '90vh' }}>
           {/* Header */}
           <div className="bg-slate-900 px-6 py-5">
             <div className="flex items-center gap-3 mb-2">
@@ -619,7 +618,7 @@ export default function MyTickets() {
       </AnimatedModal>
 
       <AnimatedModal show={showConfirm} onClose={() => setShowConfirm(false)}>
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl mx-4 overflow-hidden border border-slate-200">
+        <div className="bg-white rounded-2xl shadow-2xl w-[calc(100vw-2rem)] md:w-full max-w-xl mx-auto overflow-hidden border border-slate-200 flex flex-col" style={{ maxHeight: '90vh' }}>
           <div className="bg-slate-900 px-6 py-5">
             <div className="flex items-center gap-3 mb-2">
               <span className="px-2 py-0.5 bg-white/10 text-white/70 text-[10px] font-bold uppercase tracking-widest rounded">
@@ -671,7 +670,7 @@ export default function MyTickets() {
       </AnimatedModal>
 
       <AnimatedModal show={showReopen} onClose={() => setShowReopen(false)}>
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl mx-4 overflow-hidden border border-slate-200">
+        <div className="bg-white rounded-2xl shadow-2xl w-[calc(100vw-2rem)] md:w-full max-w-xl mx-auto overflow-hidden border border-slate-200 flex flex-col" style={{ maxHeight: '90vh' }}>
           <div className="bg-slate-900 px-6 py-5">
             <div className="flex items-center gap-3 mb-2">
               <span className="px-2 py-0.5 bg-white/10 text-white/70 text-[10px] font-bold uppercase tracking-widest rounded">

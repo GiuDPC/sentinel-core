@@ -397,6 +397,5 @@ export function generateOpenApiConfig() {
       title: 'Sentinel-Core API',
       description: 'API Documentada autogenerada con Zod para Sentinel-Core.',
     },
-    servers: [{ url: 'http://localhost:5000' }],
   });
 }

@@ -336,7 +336,7 @@ export default function Reports() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
           <h2 className="text-3xl font-bold text-slate-900 tracking-tight font-display">Reportes</h2>
           <p className="text-sm font-medium text-slate-600 mt-1 mb-5">Analíticas del centro comercial</p>
@@ -365,7 +365,7 @@ export default function Reports() {
             </button>
           </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap sm:flex-nowrap gap-3 w-full sm:w-auto">
           <div className="relative">
             <button onClick={() => setOpenDateFilter(openDateFilter === 'date' ? null : 'date')} className='h-10 px-4 border border-slate-200 rounded-lg flex items-center gap-2 text-sm font-medium bg-white hover:bg-slate-50 text-slate-600 transition-all shadow-sm'>
               <Calendar className='h-4 w-4' />

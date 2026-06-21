@@ -538,7 +538,7 @@ return (
 
       {/* Modal Asignacion/Reasignacion Inteligente */}
       <AnimatedModal show={assignModal} onClose={() => setAssignModal(false)}>
-        <div className="bg-white rounded-[32px] shadow-[0_25px_60px_rgba(15,23,42,0.15)] w-full max-w-xl mx-4 overflow-hidden border border-slate-200">
+        <div className="bg-white rounded-2xl md:rounded-[32px] shadow-[0_25px_60px_rgba(15,23,42,0.15)] w-[calc(100vw-2rem)] md:w-full max-w-xl mx-auto overflow-hidden border border-slate-200 flex flex-col">
           <div className="px-7 py-5 border-b border-slate-200 bg-slate-50">
             <div className="flex items-center justify-between gap-4">
               <div>
@@ -624,7 +624,7 @@ return (
 
       {/* Modal Detalle de Ticket (Admin) */}
       <AnimatedModal show={detailModal} onClose={() => setDetailModal(false)}>
-        <div className="bg-white rounded-[32px] shadow-[0_25px_60px_rgba(15,23,42,0.15)] w-full max-w-2xl mx-4 overflow-hidden border border-slate-200" style={{ maxHeight: '90vh' }}>
+        <div className="bg-white rounded-2xl md:rounded-[32px] shadow-[0_25px_60px_rgba(15,23,42,0.15)] w-[calc(100vw-2rem)] md:w-full max-w-2xl mx-auto overflow-hidden border border-slate-200 flex flex-col" style={{ maxHeight: '90vh' }}>
           {loadingDetail ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <div className="w-8 h-8 border-4 border-slate-100 border-t-blue-600 rounded-full animate-spin" />

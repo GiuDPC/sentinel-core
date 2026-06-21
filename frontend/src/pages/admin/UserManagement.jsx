@@ -238,7 +238,8 @@ export default function UserManagement() {
           </div>
         ) : (
           <>
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm whitespace-nowrap">
               <thead>
                 <tr className="bg-slate-50/50 border-b border-slate-200">
                   <th className="px-6 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Nombre</th>
@@ -297,6 +298,7 @@ export default function UserManagement() {
                 })}
               </tbody>
             </table>
+            </div>
 
             {/* Paginación */}
             {totalPages > 1 && (
