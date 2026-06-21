@@ -7,8 +7,8 @@ import { isValidTransition } from '../utils/state-machine.js';
 import { sanitizeTicketInput } from '../utils/sanitize.js';
 import { notificationService } from './notification.service.js';
 import { TICKET_STATUS, AUDIT_ACTIONS, ROLES } from '../config/constants.js';
-import type { Prisma } from '../../generated/prisma/index.js';
-import { TicketStatus, TicketPriority, Department } from '../../generated/prisma/index.js';
+import type { Prisma } from '@prisma/client';
+import { TicketStatus, TicketPriority, Department } from '@prisma/client';
 
 type TransactionClient = Prisma.TransactionClient;
 

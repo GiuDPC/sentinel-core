@@ -4,7 +4,7 @@ import { prisma } from '../config/prisma.js';
 import { env } from '../config/env.js';
 import { JWT_EXPIRATION } from '../config/constants.js';
 import { AppError } from '../utils/app-error.js';
-import { Department } from '../../generated/prisma/index.js';
+import { Department } from '@prisma/client';
 
 // Helper para acceder al role con el include
 type UserWithRole = Awaited<ReturnType<typeof prisma.user.findUnique>> & { role: { name: string } };

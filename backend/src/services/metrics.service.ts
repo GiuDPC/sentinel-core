@@ -1,6 +1,6 @@
 import { prisma } from '../config/prisma.js';
 import { TICKET_STATUS } from '../config/constants.js';
-import type { Prisma } from '../../generated/prisma/index.js';
+import type { Prisma } from '@prisma/client';
 
 type TransactionClient = Prisma.TransactionClient;
 
