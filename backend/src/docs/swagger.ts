@@ -249,6 +249,26 @@ registry.registerPath({
   },
 });
 
+registry.registerPath({
+  method: 'get',
+  path: '/api/tickets/{id}/closure-report',
+  summary: 'Descargar acta de resolución técnica (PDF)',
+  tags: ['Tickets'],
+  security: [{ cookieAuth: [] }],
+  request: {
+    params: z.object({ id: z.string() })
+  },
+  responses: {
+    200: { 
+      description: 'Documento PDF generado exitosamente',
+      content: { 'application/pdf': { schema: z.string() } }
+    },
+    400: errorResponse,
+    403: errorResponse,
+    404: errorResponse,
+  },
+});
+
 // -------------------------------------------------------------
 // COMMENT ROUTES
 // -------------------------------------------------------------

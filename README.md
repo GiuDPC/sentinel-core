@@ -165,15 +165,16 @@ sentinel-core/
 │ dueDate         │
 │ creatorId       │     ┌─────────────────┐
 │ categoryId      │     │   AuditLog
- slaBreached      │     ├─────────────────┤
+│ slaBreached     │     ├─────────────────┤
 │ resolutionNote  │     │ id              │
-│ ratingComment   │     │ ticketId        │
-│ rating          │     │ userId          │
-│ createdAt       │     │ action          │
-│ updatedAt       │     │ oldValue        │
-└─────────────────┘     │ newValue        │
-                        │ createdAt       │
-                        └─────────────────┘
+│ timeSpentMinutes│     │ ticketId        │
+│ materialsUsed   │     │ userId          │
+│ resolvedAt      │     │ action          │
+│ ratingComment   │     │ oldValue        │
+│ rating          │     │ newValue        │
+│ createdAt       │     │ createdAt       │
+│ updatedAt       │     └─────────────────┘
+└─────────────────┘     
 ```
 
 #### Estados del Ticket
@@ -422,10 +423,10 @@ Al ejecutar `npx prisma db seed` en producción, se crearán estas cuentas de pr
 
 | Rol | Usuario | Contraseña |
 | --- | --- | --- |
-| **👨‍💻 Admin Principal** | `admin@sentinel.local` | `SentinelAdmin2026!` |
-| **👨‍🏫 Profesor Admin** | `profesor.admin@sentinel.local` | `SentinelAdmin2026!` |
-| **🏬 Profesor Locatario** | `profesor.locatario@sentinel.local` | `Locatario2026!` |
-| **🛠️ Técnico Prueba** | `carlos.perez@sentinel.local` | `Tecnico2026!` |
+| Admin Principal | `admin@sentinel.local` | `SentinelAdmin2026!` |
+| Profesor Admin | `profesor.admin@sentinel.local` | `SentinelAdmin2026!` |
+| Profesor Locatario | `profesor.locatario@sentinel.local` | `Locatario2026!` |
+| Técnico Prueba | `carlos.perez@sentinel.local` | `Tecnico2026!` |
 
 ---
 
