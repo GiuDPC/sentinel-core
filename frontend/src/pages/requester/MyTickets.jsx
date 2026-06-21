@@ -521,7 +521,7 @@ export default function MyTickets() {
             </div>
 
             {/* Reporte de Resolución */}
-            {(selectedTicket?.status === 'RESOLVED' || selectedTicket?.status === 'CLOSED') ? (
+            {(selectedTicket?.status === 'RESOLVED' || selectedTicket?.status === 'CLOSED' || selectedTicket?.status === 'AWAITING_CONFIRMATION') ? (
               <div className="px-6 py-5 border-b border-slate-100 bg-emerald-50/30">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest flex items-center gap-2">
@@ -534,9 +534,53 @@ export default function MyTickets() {
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-slate-700 leading-relaxed border-l-2 border-emerald-300 pl-4">
+                <p className="text-sm text-slate-700 leading-relaxed border-l-2 border-emerald-300 pl-4 mb-4">
                   {selectedTicket?.resolutionNote || selectedTicket?.resolutionComment || 'El personal técnico ha verificado y corregido la incidencia reportada.'}
                 </p>
+
+                {/* Resource consumption info */}
+                {(selectedTicket?.timeSpentMinutes || selectedTicket?.materialsUsed) && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                    {selectedTicket.timeSpentMinutes && (
+                      <div className="bg-white/60 rounded-lg px-3 py-2 border border-emerald-100">
+                        <p className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">Tiempo invertido</p>
+                        <p className="text-xs font-bold text-slate-900 mt-0.5">
+                          {Math.floor(selectedTicket.timeSpentMinutes / 60)}h {selectedTicket.timeSpentMinutes % 60}min
+                        </p>
+                      </div>
+                    )}
+                    {selectedTicket.materialsUsed && (
+                      <div className="bg-white/60 rounded-lg px-3 py-2 border border-emerald-100">
+                        <p className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">Materiales</p>
+                        <p className="text-xs font-bold text-slate-900 mt-0.5">{selectedTicket.materialsUsed}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Download closure report */}
+                <button
+                  onClick={async () => {
+                    try {
+                      const blob = await ticketsApi.getClosureReport(selectedTicket.id)
+                      const url = URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = `acta-resolucion-${selectedTicket.ticketCode}.pdf`
+                      document.body.appendChild(a)
+                      a.click()
+                      a.remove()
+                      URL.revokeObjectURL(url)
+                      notifications.success('Acta descargada', 'Descarga')
+                    } catch (err) {
+                      notifications.error(err.message || 'Error al descargar', 'Error')
+                    }
+                  }}
+                  className="w-full py-2.5 bg-emerald-700 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl hover:bg-emerald-800 transition-all active:scale-[0.98] shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  Descargar Acta de Resolución (PDF)
+                </button>
               </div>
             ) : (
               <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50">

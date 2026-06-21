@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { ticketService } from '../services/ticket.service.js';
 import { assignmentService } from '../services/assignment.service.js';
+import { closureReportService } from '../services/closure-report.service.js';
 
 
 async function create(req: Request, res: Response, next: NextFunction) {
@@ -132,7 +133,11 @@ async function resolveWithNote(req: Request, res: Response, next: NextFunction) 
   try {
     const ticket = await ticketService.resolveWithNote(
       String(req.params.id),
-      { resolutionNote: req.body.resolutionNote },
+      {
+        resolutionNote: req.body.resolutionNote,
+        timeSpentMinutes: req.body.timeSpentMinutes,
+        materialsUsed: req.body.materialsUsed,
+      },
       req.user!.id
     );
     res.json({ ticket });
@@ -157,9 +162,23 @@ async function confirmTicket(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+async function getClosureReport(req: Request, res: Response, next: NextFunction) {
+  try {
+    const pdfBuffer = await closureReportService.generateClosureReport(String(req.params.id));
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="acta-resolucion-${req.params.id.slice(0, 8)}.pdf"`,
+      'Content-Length': pdfBuffer.length,
+    });
+    res.send(pdfBuffer);
+  } catch (error) {
+    next(error);
+  }
+}
+
 export const ticketController = {
   create, findAll, findById, updateStatus,
   assignTechnician, reassignTechnician, getTechniciansWorkload,
   findMyTickets, findAssigned,
-  resolveWithNote, confirmTicket,
+  resolveWithNote, confirmTicket, getClosureReport,
 };

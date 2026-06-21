@@ -18,7 +18,8 @@ import {
   ClipboardList, 
   MessageSquare,
   History,
-  ArrowLeft
+  ArrowLeft,
+  FileDown
 } from 'lucide-react'
 
 export default function TicketDetail() {
@@ -28,7 +29,11 @@ export default function TicketDetail() {
   const [loading, setLoading] = useState(true)
   const [showResolveForm, setShowResolveForm] = useState(false)
   const [resolutionNote, setResolutionNote] = useState('')
+  const [timeHours, setTimeHours] = useState('')
+  const [timeMinutes, setTimeMinutes] = useState('')
+  const [materialsUsed, setMaterialsUsed] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [downloading, setDownloading] = useState(false)
 
   const loadTicket = useCallback(async () => {
     setLoading(true)
@@ -69,16 +74,44 @@ export default function TicketDetail() {
       return
     }
     setSubmitting(true)
+    const totalMinutes = (parseInt(timeHours || '0') * 60) + parseInt(timeMinutes || '0')
     try {
-      await ticketsApi.resolveWithNote(id, resolutionNote)
+      await ticketsApi.resolveWithNote(id, {
+        resolutionNote,
+        timeSpentMinutes: totalMinutes > 0 ? totalMinutes : undefined,
+        materialsUsed: materialsUsed.trim() || undefined,
+      })
       notifications.success('Ticket enviado para confirmación del solicitante', 'Resuelto')
       setShowResolveForm(false)
       setResolutionNote('')
+      setTimeHours('')
+      setTimeMinutes('')
+      setMaterialsUsed('')
       loadTicket()
     } catch (error) {
       notifications.error(error.message || 'Error al resolver', 'Error')
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  async function handleDownloadReport() {
+    setDownloading(true)
+    try {
+      const blob = await ticketsApi.getClosureReport(id)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `acta-resolucion-${ticket?.ticketCode || id.slice(0, 8)}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+      notifications.success('Acta descargada correctamente', 'Descarga')
+    } catch (error) {
+      notifications.error(error.message || 'Error al descargar', 'Error')
+    } finally {
+      setDownloading(false)
     }
   }
 
@@ -185,6 +218,55 @@ export default function TicketDetail() {
               rows={5}
               className="w-full px-5 py-4 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all resize-none mb-4 shadow-sm"
             />
+
+            {/* Time tracking & materials */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">
+                  Tiempo Invertido (opcional)
+                </label>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="number"
+                      min="0"
+                      max="999"
+                      value={timeHours}
+                      onChange={(e) => setTimeHours(e.target.value)}
+                      placeholder="0"
+                      className="w-16 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    />
+                    <span className="text-xs text-slate-400 font-bold">hrs</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="number"
+                      min="0"
+                      max="59"
+                      value={timeMinutes}
+                      onChange={(e) => setTimeMinutes(e.target.value)}
+                      placeholder="0"
+                      className="w-16 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    />
+                    <span className="text-xs text-slate-400 font-bold">min</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">
+                  Materiales Utilizados (opcional)
+                </label>
+                <input
+                  type="text"
+                  value={materialsUsed}
+                  onChange={(e) => setMaterialsUsed(e.target.value)}
+                  maxLength={500}
+                  placeholder="Ej: 2 bombillos LED, 3m cable UTP"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                />
+              </div>
+            </div>
             
             <div className="flex items-center justify-between">
               <p className={`text-[10px] font-bold uppercase tracking-widest ${resolutionNote.trim().length < 10 ? 'text-rose-500' : 'text-slate-400'}`}>
@@ -192,21 +274,42 @@ export default function TicketDetail() {
               </p>
               <div className="flex gap-3">
                 <button
-                  onClick={() => { setShowResolveForm(false); setResolutionNote('') }}
-                  className="px-6 py-2 text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600 transition-colors"
+                  onClick={() => { setShowResolveForm(false); setResolutionNote(''); setTimeHours(''); setTimeMinutes(''); setMaterialsUsed('') }}
+                  className="px-6 py-2 text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600 transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleResolve}
                   disabled={submitting || resolutionNote.trim().length < 10}
-                  className="px-8 py-2.5 bg-blue-950 text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-slate-800 disabled:opacity-50 transition-all active:scale-95 shadow-md"
+                  className="px-8 py-2.5 bg-blue-950 text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-slate-800 disabled:opacity-50 transition-all active:scale-95 shadow-md cursor-pointer"
                 >
                   {submitting ? 'Enviando...' : 'Finalizar Tarea'}
                 </button>
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Download closure report for resolved/closed tickets */}
+      {(ticket.status === 'AWAITING_CONFIRMATION' || ticket.status === 'RESOLVED' || ticket.status === 'CLOSED') && (
+        <div className="bg-emerald-50 rounded-2xl p-6 border border-emerald-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h4 className="text-sm font-bold text-emerald-900 flex items-center gap-2">
+              <CheckCircle2 size={16} className="text-emerald-600" />
+              Acta de Resolución Técnica disponible
+            </h4>
+            <p className="text-xs text-emerald-700 mt-1">Documento formal con métricas ANS, trazabilidad y consumo de recursos.</p>
+          </div>
+          <button
+            onClick={handleDownloadReport}
+            disabled={downloading}
+            className="px-6 py-2.5 bg-emerald-700 text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-emerald-800 disabled:opacity-50 transition-all active:scale-95 shadow-md flex items-center gap-2 shrink-0 cursor-pointer"
+          >
+            <FileDown size={14} />
+            {downloading ? 'Descargando...' : 'Descargar PDF'}
+          </button>
         </div>
       )}
 

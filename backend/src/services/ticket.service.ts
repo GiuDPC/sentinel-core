@@ -401,7 +401,7 @@ async function updateStatus(
  */
 async function resolveWithNote(
   ticketId: string,
-  data: { resolutionNote: string },
+  data: { resolutionNote: string; timeSpentMinutes?: number; materialsUsed?: string },
   userId: string
 ) {
   const ticket = await prisma.ticket.findUnique({
@@ -431,6 +431,8 @@ async function resolveWithNote(
         status: TICKET_STATUS.AWAITING_CONFIRMATION,
         resolutionNote: data.resolutionNote.trim(),
         resolvedAt: new Date(),
+        timeSpentMinutes: data.timeSpentMinutes ?? null,
+        materialsUsed: data.materialsUsed?.trim() || null,
       },
       include: {
         category: true,
