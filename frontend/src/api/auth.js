@@ -28,7 +28,6 @@ export const authApi = {
     try {
       await apiClient.post('/auth/logout')
     } catch {
-      // Ignorar errores en logout
     }
   },
 

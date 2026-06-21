@@ -9,10 +9,8 @@ import { env } from '../config/env.js';
  * 2. Header `Authorization: Bearer <token>` (fallback)
  */
 export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
-    // Primero intentar cookie
     let token = req.cookies?.token;
 
-    // Fallback: Authorization header (Bearer)
     if (!token) {
         const authHeader = req.headers.authorization;
         if (authHeader?.startsWith('Bearer ')) {

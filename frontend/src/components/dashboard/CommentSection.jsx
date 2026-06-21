@@ -13,7 +13,6 @@ export default function CommentSection({ ticketId, userRole, initialComments = [
   const [submitting, setSubmitting] = useState(false)
   const scrollContainerRef = useRef(null)
 
-  // Patrón de React para ajustar el estado si las props cambian sin gatillar efectos en cascada
   if (initialComments !== prevInitialComments) {
     setComments(initialComments)
     setPrevInitialComments(initialComments)
@@ -65,10 +64,8 @@ export default function CommentSection({ ticketId, userRole, initialComments = [
         isInternal: internal
       })
       
-      // Reemplazamos el optimista con el real
       setComments(prev => prev.map(c => c.id === tempId ? data : c))
     } catch (error) {
-      // Revertimos el cambio si falla
       setComments(prev => prev.filter(c => c.id !== tempId))
       notifications.error(error.message || 'Error al enviar')
     } finally {

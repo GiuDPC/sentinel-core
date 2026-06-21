@@ -27,7 +27,6 @@ describe('Auth Integration Tests', () => {
   describe('POST /api/auth/login', () => {
     it('debe loguear un usuario correctamente y devolver una cookie', async () => {
       const mockUser = { id: 1, email: 'test@test.com', firstName: 'Juan', lastName: 'Perez', role: 'REQUESTER' };
-      // @ts-ignore
       authService.login.mockResolvedValue({ user: mockUser, token: 'fake-token' });
 
       const response = await request(app)

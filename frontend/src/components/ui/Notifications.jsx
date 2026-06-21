@@ -2,13 +2,8 @@ import { toast } from 'sonner'
 import Swal from 'sweetalert2'
 import 'sweetalert2/dist/sweetalert2.min.css'
 
-// ─────────────────────────────────────────────
-// Toast notifications → Sonner
-// Modales de confirmación / loading → SweetAlert2
-// ─────────────────────────────────────────────
 
 export const notifications = {
-  // ── Toasts (Sonner) ──────────────────────────
   success: (message, title) => {
     toast.success(title || '¡Éxito!', { description: message })
   },
@@ -25,7 +20,6 @@ export const notifications = {
     toast.info(title || 'Información', { description: message })
   },
 
-  // ── Modales (SweetAlert2 — se mantienen) ─────
   confirm: (options) => {
     const { title = '¿Estás seguro?', text, confirmText = 'Sí', cancelText = 'Cancelar', type = 'question' } = options
 
@@ -53,7 +47,6 @@ export const notifications = {
     })
   },
 
-  // Toast con loading
   loading: (message = 'Cargando...') => {
     Swal.fire({
       title: message,

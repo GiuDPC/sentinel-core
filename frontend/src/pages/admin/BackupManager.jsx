@@ -9,13 +9,11 @@ export default function BackupManager() {
   const [loading, setLoading] = useState(true)
   const [isCreating, setIsCreating] = useState(false)
   
-  // Modal de Restaurar
   const [showRestoreModal, setShowRestoreModal] = useState(false)
   const [selectedBackup, setSelectedBackup] = useState(null)
   const [confirmText, setConfirmText] = useState('')
   const [isRestoring, setIsRestoring] = useState(false)
 
-  // Filtros de fecha
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [appliedFilter, setAppliedFilter] = useState({ from: '', to: '' })
@@ -95,7 +93,6 @@ export default function BackupManager() {
     }
   }
 
-  // Filtrado local basado en el filtro aplicado (no en tiempo real)
   const filteredBackups = backups.filter(b => {
     if (!appliedFilter.from && !appliedFilter.to) return true
     const bDate = new Date(b.createdAt)

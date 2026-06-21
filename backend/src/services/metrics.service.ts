@@ -7,7 +7,6 @@ type TransactionClient = Prisma.TransactionClient;
 async function getDashboard() {
   const now = new Date();
 
-  // ── Contadores generales (optimizado: 1 query groupBy en vez de 7 counts)
   const statusCounts = await prisma.ticket.groupBy({
     by: ['status'],
     _count: { id: true },
@@ -24,7 +23,6 @@ async function getDashboard() {
   const resolvedTickets = countByStatus(TICKET_STATUS.RESOLVED);
   const closedTickets = countByStatus(TICKET_STATUS.CLOSED);
 
-  // ── SLA vencidos tickets activos pasados de fecha
   const slaBreached = await prisma.ticket.count({
     where: {
       status: { notIn: [TICKET_STATUS.RESOLVED, TICKET_STATUS.CLOSED] },
@@ -32,13 +30,11 @@ async function getDashboard() {
     },
   });
 
-  // ── Tickets por categoría 
   const ticketsByCategory = await prisma.ticket.groupBy({
     by: ['categoryId'],
     _count: { id: true },
   });
 
-  // Traer nombres de categorías
   const categories = await prisma.category.findMany({
     where: { id: { in: ticketsByCategory.map((t) => t.categoryId) } },
   });
@@ -48,7 +44,6 @@ async function getDashboard() {
     count: item._count.id,
   }));
 
-  // ── Tickets por prioridad
   const ticketsByPriority = await prisma.ticket.groupBy({
     by: ['priority'],
     _count: { id: true },
@@ -59,7 +54,6 @@ async function getDashboard() {
     count: item._count.id,
   }));
 
-  // ── Tickets por estado 
   const ticketsByStatus = [
     { status: TICKET_STATUS.OPEN, count: openTickets },
     { status: TICKET_STATUS.ASSIGNED, count: assignedTickets },
@@ -69,7 +63,6 @@ async function getDashboard() {
     { status: TICKET_STATUS.CLOSED, count: closedTickets },
   ];
 
-  // ── Promedio de resolución horas (Optimizado con SQL nativo)
   const result = await prisma.$queryRaw<[{ avg: number }]>`
     SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (updated_at - created_at)) / 3600), 0) as avg
     FROM tickets
@@ -77,13 +70,11 @@ async function getDashboard() {
   `;
   const avgResolutionHours = Math.round(Number(result[0]?.avg || 0) * 10) / 10;
 
-  // ── Tickets creados este mes
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const ticketsThisMonth = await prisma.ticket.count({
     where: { createdAt: { gte: startOfMonth } },
   });
 
-  // ── Tickets creados el mes anterior (para tendencias)
   const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
   const ticketsLastMonth = await prisma.ticket.count({
@@ -92,12 +83,10 @@ async function getDashboard() {
     },
   });
 
-  // Calcular tendencia: % vs mes anterior
   const trendPercentage = ticketsLastMonth > 0
     ? Math.round(((ticketsThisMonth - ticketsLastMonth) / ticketsLastMonth) * 100)
     : 0;
 
-  // ── Tickets con SLA próximo a vencer (< 2 horas) ──
   const twoHoursFromNow = new Date(now.getTime() + 2 * 60 * 60 * 1000);
   const slaAtRisk = await prisma.ticket.count({
     where: {
@@ -106,9 +95,6 @@ async function getDashboard() {
     },
   });
 
-  // ── Tickets agrupados por día de la semana y prioridad (para Recharts)
-  // En vez de usar solo los últimos 7 días estrictos (que dejaría el gráfico plano si no hay actividad reciente),
-  // agrupamos TODOS los tickets por su día de la semana.
   const allTickets = await prisma.ticket.findMany({
     select: { priority: true, createdAt: true }
   });
@@ -127,9 +113,6 @@ async function getDashboard() {
     else if (t.priority === 'CRITICAL') dayEntry.Crítica++;
   });
 
-  // Reordenar para que empiece desde hoy hacia atrás 7 días, o de Lunes a Domingo
-  // Para simplificar, lo dejamos de Domingo a Sábado (el map ya lo hizo) o lo rotamos:
-  // Rotar el array para que el día actual quede al final:
   const todayIndex = now.getDay();
   const rotatedTickets = [
     ...ticketsByDateAndPriority.slice(todayIndex + 1),
@@ -206,7 +189,6 @@ async function getRequesterMetrics(userId: string) {
     }),
   ]);
 
-  // Promedio de resolución de tickets del solicitante (Optimizado con SQL nativo)
   const reqResult = await prisma.$queryRaw<[{ avg: number }]>`
     SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (updated_at - created_at)) / 3600), 0) as avg
     FROM tickets
@@ -261,7 +243,6 @@ async function getTechnicianMetrics(userId: string) {
     }),
   ]);
 
-  // Promedio de resolución (Optimizado con SQL nativo)
   const techResult = await prisma.$queryRaw<[{ avg: number }]>`
     SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (t.updated_at - t.created_at)) / 3600), 0) as avg
     FROM tickets t

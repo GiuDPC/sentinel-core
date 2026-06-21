@@ -1,7 +1,5 @@
 import { describe, it, expect } from 'vitest'
 
-// Funciones de validación de teléfono extraídas para testing
-// Estas replican la lógica de SigninForm.jsx
 
 function validatePhone(phone) {
   const cleanPhone = phone.replace(/\D/g, '')

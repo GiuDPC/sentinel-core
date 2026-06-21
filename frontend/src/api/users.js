@@ -18,7 +18,6 @@ export const usersApi = {
     return apiClient.delete(`/users/${id}`)
   },
 
-  // Actualizar perfil propio
   updateProfile(data) {
     return apiClient.patch('/users/profile', data)
   },

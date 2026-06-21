@@ -23,7 +23,6 @@ export class NotificationService {
       })
     } catch (error) {
       console.error('Error creating notification:', error)
-      // No lanzamos error para no romper el flujo principal si falla la notificación
     }
   }
 

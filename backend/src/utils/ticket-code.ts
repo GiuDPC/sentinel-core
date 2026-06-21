@@ -23,7 +23,6 @@ export async function generateTicketCode(prismaClient: any): Promise<string> {
       const nextNumber = lastNumber + 1;
       return `TKT-${nextNumber.toString().padStart(4, '0')}`;
     } catch (error: any) {
-      // Si es unique constraint violation, reintentar
       if (error?.code === 'P2002' && attempt < MAX_RETRIES - 1) {
         continue;
       }
@@ -31,7 +30,6 @@ export async function generateTicketCode(prismaClient: any): Promise<string> {
     }
   }
 
-  // Último recurso: usar timestamp para garantizar unicidad
   const timestamp = Date.now().toString(36).toUpperCase();
   return `TKT-${timestamp}`;
 }

@@ -9,10 +9,8 @@ export function SidebarProvider({ children }) {
   const close = useCallback(() => setIsOpen(false), [])
   const toggle = useCallback(() => setIsOpen(prev => !prev), [])
 
-  // Close sidebar on route change (handled by listening to popstate)
   useEffect(() => {
     const handleResize = () => {
-      // Auto-close on resize to desktop
       if (window.innerWidth >= 1024) {
         setIsOpen(false)
       }

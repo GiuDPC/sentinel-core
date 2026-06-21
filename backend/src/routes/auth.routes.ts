@@ -8,7 +8,6 @@ import { loginSchema, registerSchema, registerPublicSchema, changePasswordSchema
 
 const router = Router();
 
-// Rate limiter específico para login — previene brute force
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
@@ -25,10 +24,8 @@ const registerLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// POST /api/auth/login — Público (con rate limit estricto)
 router.post('/login', loginLimiter, validate(loginSchema), authController.login);
 
-// POST /api/auth/register — Solo Admin (crea cualquier rol)
 router.post(
   '/register',
   authMiddleware,
@@ -37,7 +34,6 @@ router.post(
   authController.register
 );
 
-// POST /api/auth/register-public — Público (solo crea REQUESTER, phone opcional)
 router.post(
   '/register-public',
   registerLimiter,
@@ -45,13 +41,10 @@ router.post(
   authController.registerPublic
 );
 
-// POST /api/auth/logout — Autenticado
 router.post('/logout', authMiddleware, authController.logout);
 
-// GET /api/auth/me — Obtener usuario actual
 router.get('/me', authMiddleware, authController.me);
 
-// POST /api/auth/change-password — Cambiar contraseña (cualquier usuario autenticado)
 router.post(
   '/change-password',
   authMiddleware,

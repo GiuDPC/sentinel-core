@@ -40,7 +40,6 @@ export default function CreateTicket() {
         const list = Array.isArray(data) ? data : (data.data || data.categories || [])
         setCategories(list)
         
-        // Auto-seleccionar categoría si viene por estado de navegación
         if (locationState.state?.preselectedCategory) {
           const cat = list.find((c) => c.name === locationState.state.preselectedCategory)
           if (cat) {

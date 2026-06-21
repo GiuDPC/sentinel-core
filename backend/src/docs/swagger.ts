@@ -8,7 +8,6 @@ import { updateUserSchema } from '../schemas/user.schema.js';
 
 const registry = new OpenAPIRegistry();
 
-// Autenticación por Cookie
 const cookieAuth = registry.registerComponent('securitySchemes', 'cookieAuth', {
   type: 'apiKey',
   in: 'cookie',
@@ -16,9 +15,6 @@ const cookieAuth = registry.registerComponent('securitySchemes', 'cookieAuth', {
 });
 
 
-// -------------------------------------------------------------
-// SCHEMAS
-// -------------------------------------------------------------
 registry.register('LoginInput', loginSchema);
 registry.register('RegisterInput', registerSchema);
 registry.register('CreateTicketInput', createTicketSchema);
@@ -45,9 +41,6 @@ const messageResponse = {
   }
 };
 
-// -------------------------------------------------------------
-// AUTH ROUTES
-// -------------------------------------------------------------
 registry.registerPath({
   method: 'post',
   path: '/api/auth/login',
@@ -133,9 +126,6 @@ registry.registerPath({
   },
 });
 
-// -------------------------------------------------------------
-// CATEGORY ROUTES
-// -------------------------------------------------------------
 registry.registerPath({
   method: 'get',
   path: '/api/categories',
@@ -163,9 +153,6 @@ registry.registerPath({
   },
 });
 
-// -------------------------------------------------------------
-// TICKET ROUTES
-// -------------------------------------------------------------
 registry.registerPath({
   method: 'get',
   path: '/api/tickets',
@@ -269,9 +256,6 @@ registry.registerPath({
   },
 });
 
-// -------------------------------------------------------------
-// COMMENT ROUTES
-// -------------------------------------------------------------
 registry.registerPath({
   method: 'get',
   path: '/api/tickets/{ticketId}/comments',
@@ -303,9 +287,6 @@ registry.registerPath({
   },
 });
 
-// -------------------------------------------------------------
-// USER ROUTES
-// -------------------------------------------------------------
 registry.registerPath({
   method: 'get',
   path: '/api/users',
@@ -361,9 +342,6 @@ registry.registerPath({
   },
 });
 
-// -------------------------------------------------------------
-// METRICS ROUTES
-// -------------------------------------------------------------
 registry.registerPath({
   method: 'get',
   path: '/api/metrics/dashboard',

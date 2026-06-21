@@ -64,7 +64,6 @@ export default function Reports() {
       ws.getRow(3).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF001B52' } }
       ws.getRow(3).alignment = { vertical: 'middle', horizontal: 'center' }
 
-      // Borders for header
       ws.getRow(3).eachCell((cell) => {
         cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }
       })
@@ -138,7 +137,6 @@ export default function Reports() {
     const periodoStr = DATE_RANGES.find(r => r.value === dateRange)?.label || 'Todo'
     const userName = user ? `${user.firstName} ${user.lastName}` : 'Administrador'
     
-    // -- LOAD LOGO --
     try {
       const img = new Image()
       img.src = '/logo.png'
@@ -151,7 +149,6 @@ export default function Reports() {
       })
     } catch (e) { console.warn('Error loading logo for PDF', e) }
 
-    // -- HEADER --
     doc.setDrawColor(0, 27, 82)
     doc.setLineWidth(1)
     doc.line(14, 10, 196, 10)
@@ -166,7 +163,6 @@ export default function Reports() {
     doc.setFont('helvetica', 'normal')
     doc.text('SentinelCore - Gestión de Incidencias', 30, 23)
 
-    // Right side metadata
     doc.setFontSize(9)
     doc.setTextColor(40, 40, 40)
     doc.setFont('helvetica', 'bold')
@@ -179,7 +175,6 @@ export default function Reports() {
     doc.setDrawColor(200)
     doc.line(14, 28, 196, 28)
 
-    // -- RESUMEN EJECUTIVO (KPI CARDS) --
     doc.setFontSize(11)
     doc.setTextColor(0, 27, 82)
     doc.setFont('helvetica', 'bold')
@@ -191,7 +186,6 @@ export default function Reports() {
       if (isAlert) doc.setFillColor(254, 242, 242)
       doc.roundedRect(x, y, w, h, 2, 2, 'FD')
       
-      // Top accent bar inside the box
       doc.setFillColor(0, 27, 82)
       if (isAlert) doc.setFillColor(220, 38, 38)
       doc.rect(x, y, w, 2, 'F')
@@ -214,7 +208,6 @@ export default function Reports() {
     drawKpiBox(106, 42, 42, 24, 'Resueltos', summary.resolvedTickets || 0)
     drawKpiBox(152, 42, 42, 24, 'SLA Vencidos', summary.slaBreached || 0, (summary.slaBreached || 0) > 0)
 
-    // Insight paragraph
     doc.setFontSize(10)
     doc.setTextColor(40, 40, 40)
     doc.setFont('helvetica', 'normal')
@@ -225,7 +218,6 @@ export default function Reports() {
     const splitText = doc.splitTextToSize(insightText, 182)
     doc.text(splitText, 14, 76)
 
-    // -- TABLAS DE DESGLOSE --
     doc.setFontSize(12)
     doc.setTextColor(0, 27, 82)
     doc.setFont('helvetica', 'bold')

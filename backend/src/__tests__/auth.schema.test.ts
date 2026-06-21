@@ -126,7 +126,6 @@ describe('Auth Schema Validation', () => {
         confirmPassword: 'password123',
         roleId: 1,
       })
-      // roleId is not in the schema, so it should be stripped but not cause failure
       expect(result.success).toBe(true)
       if (result.success) {
         expect(result.data).not.toHaveProperty('roleId')

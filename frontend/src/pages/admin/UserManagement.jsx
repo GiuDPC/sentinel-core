@@ -19,7 +19,6 @@ export default function UserManagement() {
   const [selectedUser, setSelectedUser] = useState(null)
   const [showUserDetail, setShowUserDetail] = useState(false)
 
-  // Cargar usuarios
   async function loadUsers() {
     try {
       const data = await usersApi.getAll()
@@ -31,13 +30,11 @@ export default function UserManagement() {
     }
   }
 
-  // Efecto inicial
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadUsers()
   }, [])
 
-  // Activar/Desactivar usuario
   async function handleToggleActive(userId, isActive) {
     try {
       await usersApi.update(userId, { isActive: !isActive })
@@ -51,7 +48,6 @@ export default function UserManagement() {
     }
   }
 
-  // Filtrar usuarios localmente
   const filteredUsers = users.filter(user => {
     const searchLower = filters.search.toLowerCase()
     const matchesSearch = !filters.search || 
@@ -63,20 +59,17 @@ export default function UserManagement() {
     return matchesSearch && matchesRole && matchesStatus
   })
 
-  // Calcular paginación
   const totalPages = Math.ceil(filteredUsers.length / pagination.limit)
   const paginatedUsers = filteredUsers.slice(
     (pagination.page - 1) * pagination.limit,
     pagination.page * pagination.limit
   )
 
-  // Resetear filtros
   const resetFilters = () => {
     setFilters({ search: '', role: '', status: '' })
     setPagination(p => ({ ...p, page: 1 }))
   }
 
-  // Handlers
   const handleSearchChange = (value) => {
     setFilters(f => ({ ...f, search: value }))
     setPagination(p => ({ ...p, page: 1 }))

@@ -6,7 +6,6 @@ export default function KPICard({ title, value, subtitle, trend, trendValue, col
   const [displayValue, setDisplayValue] = useState(0)
 
   useEffect(() => {
-    // Si el valor es texto como "14h"
     const isString = typeof value === 'string'
     const numericValue = isString ? parseFloat(value.replace(/[^0-9.]/g, '')) : Number(value)
     const suffix = isString ? value.replace(/[0-9.]/g, '') : ''
@@ -16,7 +15,6 @@ export default function KPICard({ title, value, subtitle, trend, trendValue, col
       return
     }
 
-    // Deshabilitar animación en tests para no romper assertions de Vitest
     if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
       setDisplayValue(`${numericValue}${suffix}`)
       return
@@ -31,7 +29,6 @@ export default function KPICard({ title, value, subtitle, trend, trendValue, col
       const elapsed = currentTime - startTime
       const progress = Math.min(elapsed / duration, 1)
       
-      // easeOutExpo
       const easeOut = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress)
       
       const current = Math.floor(start + (end - start) * easeOut)
