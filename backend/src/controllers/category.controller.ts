@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { categoryService } from '../services/category.service';
+import { categoryService } from '../services/category.service.js';
 
 async function findAll(_req: Request, res: Response, next: NextFunction) {
   try {
