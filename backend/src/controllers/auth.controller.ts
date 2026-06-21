@@ -9,7 +9,7 @@ async function login(req: Request, res: Response, next: NextFunction) {
     res.cookie('token', result.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 8 * 60 * 60 * 1000,
     });
 
@@ -29,7 +29,11 @@ async function register(req: Request, res: Response, next: NextFunction) {
 }
 
 async function logout(_req: Request, res: Response) {
-  res.clearCookie('token');
+  res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  });
   res.json({ message: 'Sesión cerrada' });
 }
 
