@@ -10,6 +10,7 @@ import { errorHandler } from './middlewares/error.middleware.js';
 import { env } from './config/env.js';
 
 const app = express();
+app.set('trust proxy', 1); // Confía en el proxy de Render para cookies seguras
 
 const swaggerDocument = generateOpenApiConfig();
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));

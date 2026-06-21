@@ -389,44 +389,21 @@ cd backend && npm test
 
 ---
 
-## Guía de Despliegue en Producción (Tesis UNEFA)
+## Accesos de Producción (Evaluación UNEFA)
 
-Para mantener tu entorno local intacto y tener una copia del proyecto en la nube accesible para el jurado, se recomienda la siguiente arquitectura moderna y gratuita:
+El sistema se encuentra desplegado y funcional en la nube para su evaluación:
 
-### 1. Base de Datos (PostgreSQL en la Nube)
-- **Proveedor Recomendado**: [Neon.tech](https://neon.tech/) o [Supabase](https://supabase.com/).
-- **Ventaja**: Son gratuitos, muy rápidos y te dan un `DATABASE_URL` listo para usar en tu `.env`.
+### 🌐 Enlaces del Sistema
+- **Plataforma Web (Frontend):** [https://sentinel-core.vercel.app](https://sentinel-core.vercel.app)
+- **Documentación API (Swagger):** [https://sentinel-core-api.onrender.com/api/docs](https://sentinel-core-api.onrender.com/api/docs)
 
-### 2. Backend (Node.js API)
-- **Proveedor Recomendado**: [Render](https://render.com/) o [Railway](https://railway.app/).
-- **Cómo hacerlo**: 
-  1. Conecta tu repositorio de GitHub.
-  2. Selecciona la carpeta `backend`.
-  3. Comando de Build: `npm install && npm run build`
-  4. Comando de Inicio: `npm start`
-  5. Variables de entorno: Pega el `DATABASE_URL` de Neon/Supabase y tu `JWT_SECRET`.
+### 🔐 Credenciales de Acceso para el Jurado
 
-### 3. Frontend (React / Vite)
-- **Proveedor Recomendado**: [Vercel](https://vercel.com/) o [Netlify](https://www.netlify.com/).
-- **Cómo hacerlo**:
-  1. Conecta tu repositorio.
-  2. Selecciona la carpeta `frontend`.
-  3. Build command: `npm run build`
-  4. Output directory: `dist`
-  5. Variables de entorno: `VITE_API_URL` apuntando a la URL que te generó Render en el paso anterior.
-
----
-
-## Credenciales de Acceso para el Jurado Evaluador
-
-Al ejecutar `npx prisma db seed` en producción, se crearán estas cuentas de prueba:
-
-| Rol | Usuario | Contraseña |
-| --- | --- | --- |
-| Admin Principal | `admin@sentinel.local` | `SentinelAdmin2026!` |
-| Profesor Admin | `profesor.admin@sentinel.local` | `SentinelAdmin2026!` |
-| Profesor Locatario | `profesor.locatario@sentinel.local` | `Locatario2026!` |
-| Técnico Prueba | `carlos.perez@sentinel.local` | `Tecnico2026!` |
+| Rol | Usuario (Email) | Contraseña | Descripción |
+| --- | --- | --- | --- |
+| **Administrador** | `profesor.admin@sentinel.local` | `SentinelAdmin2026!` | Acceso total: Dashboard de métricas, reportes Excel y control de usuarios. |
+| **Locatario** | `profesor.locatario@sentinel.local` | `Locatario2026!` | Vista de cliente: Creación de tickets y seguimiento de incidencias. |
+| **Técnico** | `carlos.perez@sentinel.local` | `Tecnico2026!` | Vista operativa: Revisión de tickets asignados y resolución de fallas. |
 
 ---
 
