@@ -51,7 +51,6 @@ export default function TicketDetail() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadTicket()
-    // Auto-abrir formulario de resolución si viene por parámetro
     const params = new URLSearchParams(window.location.search)
     if (params.get('action') === 'resolve') {
       setShowResolveForm(true)

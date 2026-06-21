@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Mock prisma before importing the service
 vi.mock('../config/prisma.js', () => ({
   prisma: {
     ticket: {
@@ -9,7 +8,6 @@ vi.mock('../config/prisma.js', () => ({
   },
 }));
 
-// Mock pdfmake — we test data flow, not PDF rendering
 vi.mock('pdfmake', () => {
   return {
     default: {

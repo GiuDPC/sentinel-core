@@ -4,7 +4,6 @@ import { authMiddleware } from '../middlewares/auth.middleware.js'
 
 const router = Router()
 
-// Todas las rutas de notificaciones requieren autenticación
 router.use(authMiddleware)
 
 router.get('/', notificationController.getMyNotifications)

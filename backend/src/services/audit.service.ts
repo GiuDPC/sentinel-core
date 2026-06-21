@@ -3,7 +3,6 @@ import type { Prisma } from '@prisma/client';
 
 type TransactionClient = Prisma.TransactionClient;
 
-// Registra una acción en el historial de auditoría
 async function logAction(
     ticketId: string,
     userId: string,
@@ -26,7 +25,6 @@ async function logAction(
 }
 
 
-// Obtiene el historial de auditoría de un ticket
 async function findByTicketId(ticketId: string) {
   return prisma.auditLog.findMany({
     where: { ticketId },

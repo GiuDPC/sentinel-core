@@ -34,7 +34,6 @@ export default function TicketList() {
   })
   const [loading, setLoading] = useState(true)
 
-  // Modal de asignacion/reasignacion inteligente
   const [assignModal, setAssignModal] = useState(false)
   const [assignTicketId, setAssignTicketId] = useState(null)
   const [isReassign, setIsReassign] = useState(false)
@@ -42,7 +41,6 @@ export default function TicketList() {
   const [suggested, setSuggested] = useState(null)
   const [loadingTechs, setLoadingTechs] = useState(false)
 
-  // Panel detalle de ticket
   const [detailModal, setDetailModal] = useState(false)
   const [detailTicket, setDetailTicket] = useState(null)
   const [loadingDetail, setLoadingDetail] = useState(false)
@@ -70,10 +68,7 @@ export default function TicketList() {
 
   const searchTimerRef = useRef(null)
   const isInitialMount = useRef(true)
-  // 1. Callback memoizado con todas sus dependencias correctas para ESLint
   const loadTickets = useCallback(async () => {
-    // Se utiliza Promise.resolve() para diferir la ejecución y evitar la advertencia
-    // de "Calling setState synchronously within an effect" de React.
     await Promise.resolve()
     setLoading(true)
     try {
@@ -93,7 +88,6 @@ export default function TicketList() {
     }
   }, [filters.status, filters.priority, filters.search, pagination.page])
 
-  // 2. Sincronizar URL parameters al estado (sin ejecutar setState síncrono)
   useEffect(() => {
     const urlSearch = searchParams.get('search')
     if (urlSearch !== null && urlSearch !== filters.search) {
@@ -104,26 +98,20 @@ export default function TicketList() {
     }
   }, [searchParams, filters.search])
 
-  // 3. Control maestro de carga de datos (Mount y Filtros)
   useEffect(() => {
-    // Prevención para no disparar carga doble en mount si el buscador cambia rápido
     if (isInitialMount.current) {
       isInitialMount.current = false
       loadTickets()
       return
     }
 
-    // Si cambió el "search", lo maneja el setTimeout (debounce). 
-    // Si cambió status, priority o page, cargamos directo.
     if (searchTimerRef.current !== filters.search) {
-      // Es un cambio de search, guardamos el ref para el debounce y no disparamos directo
       searchTimerRef.current = filters.search
       const timer = setTimeout(() => {
         loadTickets()
       }, 400)
       return () => clearTimeout(timer)
     } else {
-      // Es un cambio de página, status o priority
       loadTickets()
     }
   }, [loadTickets, filters.search])

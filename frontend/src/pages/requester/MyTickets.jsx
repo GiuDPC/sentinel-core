@@ -29,7 +29,6 @@ export default function MyTickets() {
     actions: true
   })
 
-  // Modal confirmacion
   const [showConfirm, setShowConfirm] = useState(false)
   const [showReopen, setShowReopen] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
@@ -57,7 +56,6 @@ export default function MyTickets() {
     }
   }, [statusFilter, priorityFilter, searchFilter, pagination.page])
 
-  // Carga inicial y por filtros
   useEffect(() => {
     const timer = setTimeout(() => {
       loadTickets()
@@ -65,7 +63,6 @@ export default function MyTickets() {
     return () => clearTimeout(timer)
   }, [loadTickets])
 
-  // Abrir modal automáticamente si viene ticketId en la URL
   useEffect(() => {
     const ticketId = searchParams.get('ticketId')
     if (ticketId) {
@@ -79,7 +76,6 @@ export default function MyTickets() {
   async function openDetailsModal(ticketOrId) {
     const id = typeof ticketOrId === 'object' ? ticketOrId.id : ticketOrId
     
-    // Si ya tenemos el objeto básico, lo mostramos mientras carga el full
     if (typeof ticketOrId === 'object') {
       setSelectedTicket(ticketOrId)
     }

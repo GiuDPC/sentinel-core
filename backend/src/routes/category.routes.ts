@@ -7,16 +7,12 @@ import { createCategorySchema, updateCategorySchema } from '../schemas/category.
 
 const router = Router();
 
-// Todas las rutas de categorías requieren autenticación
 router.use(authMiddleware);
 
-// GET /api/categories — Lista todas las categorías activas
 router.get('/', categoryController.findAll);
 
-// GET /api/categories/:id — Una categoría por ID
 router.get('/:id', categoryController.findById);
 
-// POST /api/categories — Crear categoría (Solo Admin)
 router.post(
   '/',
   roleGuard('ADMIN'),
@@ -24,7 +20,6 @@ router.post(
   categoryController.create
 );
 
-// PATCH /api/categories/:id — Actualizar categoría (Solo Admin)
 router.patch(
   '/:id',
   roleGuard('ADMIN'),
@@ -32,7 +27,6 @@ router.patch(
   categoryController.update
 );
 
-// DELETE /api/categories/:id — Desactivar categoría (Solo Admin)
 router.delete(
   '/:id',
   roleGuard('ADMIN'),

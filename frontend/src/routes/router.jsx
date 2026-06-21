@@ -5,22 +5,18 @@ import ProtectedRoute from '../components/common/ProtectedRoute'
 import MainLayout from '../components/layout/MainLayout'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 
-// Auth pages — no lazy (se cargan inmediato)
 import LoginPage from '../pages/LoginPage'
 import SigninPage from '../pages/SigninPage'
 import UnauthorizedPage from '../pages/UnauthorizedPage'
 
-// Lazy loaded — Requester
 const RequesterDashboard = lazy(() => import('../pages/requester/RequesterDashboard'))
 const MyTickets = lazy(() => import('../pages/requester/MyTickets'))
 const CreateTicket = lazy(() => import('../pages/requester/CreateTicket'))
 
-// Lazy loaded — Technician
 const TechDashboard = lazy(() => import('../pages/technician/TechDashboard'))
 const AssignedTickets = lazy(() => import('../pages/technician/AssignedTickets'))
 const TicketDetail = lazy(() => import('../pages/technician/TicketDetail'))
 
-// Lazy loaded — Admin
 const AdminDashboard = lazy(() => import('../pages/admin/AdminDashboard'))
 const TicketList = lazy(() => import('../pages/admin/TicketList'))
 const UserManagement = lazy(() => import('../pages/admin/UserManagement'))
@@ -29,7 +25,6 @@ const Reports = lazy(() => import('../pages/admin/Reports'))
 const AuditLogs = lazy(() => import('../pages/admin/AuditLogs'))
 const BackupManager = lazy(() => import('../pages/admin/BackupManager'))
 
-// Profile page
 const ProfilePage = lazy(() => import('../pages/ProfilePage'))
 
 function LazyPage({ children }) {

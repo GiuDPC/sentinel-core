@@ -3,7 +3,6 @@
  * Escapa caracteres HTMLproblemáticos.
  */
 
-// Caracteres a escapar para prevenir XSS
 const ESCAPE_MAP: Record<string, string> = {
   '&': '&amp;',
   '<': '&lt;',

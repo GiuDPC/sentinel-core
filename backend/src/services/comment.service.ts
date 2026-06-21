@@ -9,7 +9,6 @@ async function create(data: {
   content: string;
   isInternal: boolean;
 }) {
-  // Verificar que el ticket existe
   const ticket = await prisma.ticket.findUnique({
     where: { id: data.ticketId },
   });
@@ -31,14 +30,12 @@ async function create(data: {
     },
   });
 
-  // Notificaciones post-comentario
   const ticketInfo = await prisma.ticket.findUnique({
     where: { id: data.ticketId },
     include: { assignments: true }
   });
 
   if (ticketInfo) {
-    // 1. Si el locatario comenta, avisar al técnico
     if (data.userId === ticketInfo.creatorId) {
       for (const assignment of ticketInfo.assignments) {
         await notificationService.createNotification({
@@ -50,7 +47,6 @@ async function create(data: {
         });
       }
     } 
-    // 2. Si es un técnico/admin y el comentario NO es interno, avisar al locatario
     else if (!data.isInternal) {
       await notificationService.createNotification({
         userId: ticketInfo.creatorId,
@@ -66,7 +62,6 @@ async function create(data: {
 }
 
 async function findByTicketId(ticketId: string, userRole: string) {
-  // Verificar que el ticket existe
   const ticket = await prisma.ticket.findUnique({
     where: { id: ticketId },
   });
@@ -74,7 +69,6 @@ async function findByTicketId(ticketId: string, userRole: string) {
     throw new AppError(404, 'Ticket no encontrado');
   }
 
-  // Los solicitantes NO ven comentarios internos
   const where: any = { ticketId };
   if (userRole === 'REQUESTER') {
     where.isInternal = false;

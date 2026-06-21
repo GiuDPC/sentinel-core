@@ -7,16 +7,13 @@ import { X } from 'lucide-react'
 
 /** Configuracion de navegacion por rol */
 const NAV_ITEMS = [
-  // Solicitante
   { label: 'Nuevo Reporte', path: '/requester/create-ticket', roles: ['REQUESTER'], icon: 'plus' },
   { label: 'Dashboard', path: '/requester/dashboard', roles: ['REQUESTER'], icon: 'grid' },
   { label: 'Mis Tickets', path: '/requester/my-tickets', roles: ['REQUESTER'], icon: 'ticket' },
 
-  // Tecnico
   { label: 'Dashboard', path: '/technician/dashboard', roles: ['TECHNICIAN'], icon: 'grid' },
   { label: 'Tickets Asignados', path: '/technician/assigned', roles: ['TECHNICIAN'], icon: 'wrench' },
 
-  // Admin
   { label: 'Dashboard', path: '/admin/dashboard', roles: ['ADMIN'], icon: 'grid' },
   { label: 'Todos los Tickets', path: '/admin/tickets', roles: ['ADMIN'], icon: 'ticket' },
   { label: 'Usuarios', path: '/admin/users', roles: ['ADMIN'], icon: 'users' },
@@ -25,7 +22,6 @@ const NAV_ITEMS = [
   { label: 'Reportes', path: '/admin/reports', roles: ['ADMIN'], icon: 'chart' },
   { label: 'Backups', path: '/admin/backups', roles: ['ADMIN'], icon: 'database' },
 
-  // Común para todos
   { label: 'Mi Perfil', path: '/profile', roles: ['ADMIN', 'TECHNICIAN', 'REQUESTER'], icon: 'user' },
 ]
 

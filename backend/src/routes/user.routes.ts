@@ -9,20 +9,16 @@ const router = Router();
 
 router.use(authMiddleware);
 
-// GET /api/users — Solo Admin
 router.get('/', roleGuard('ADMIN'), userController.findAll);
 
-// PATCH /api/users/profile — Cualquier usuario (actualizar su perfil) - DEBE IR ANTES de /:id
 router.patch(
   '/profile',
   validate(updateProfileSchema),
   userController.updateProfile
 );
 
-// GET /api/users/:id — Solo Admin
 router.get('/:id', roleGuard('ADMIN'), userController.findById);
 
-// PATCH /api/users/:id — Solo Admin
 router.patch(
   '/:id',
   roleGuard('ADMIN'),
@@ -30,7 +26,6 @@ router.patch(
   userController.update
 );
 
-// DELETE /api/users/:id — Solo Admin (soft delete)
 router.delete('/:id', roleGuard('ADMIN'), userController.softDelete);
 
 export default router;

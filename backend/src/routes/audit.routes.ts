@@ -7,7 +7,6 @@ const router = Router();
 
 router.use(authMiddleware);
 
-// GET /api/audit-logs — Solo Admin
 router.get('/', roleGuard('ADMIN'), auditController.findAll);
 
 export default router;

@@ -15,7 +15,6 @@ app.set('trust proxy', 1); // Confía en el proxy de Render para cookies seguras
 const swaggerDocument = generateOpenApiConfig();
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Middlewares Globales
 app.use(compression());
 app.use(cors({
   origin: env.CORS_ORIGIN,
@@ -32,15 +31,12 @@ app.use(rateLimit({
   message: { error: 'Demasiadas peticiones, intentá en 15 minutos' },
 }));
 
-// Rutas
 app.use('/api', routes);
 
-// Health Check
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Error Handler
 app.use(errorHandler);
 
 export default app;

@@ -26,7 +26,6 @@ const ACTION_OPTIONS = [
 const formatValue = (value) => {
   if (!value || value === '-') return '-'
   
-  // Format long UUIDs (only if it matches UUID format)
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   if (uuidRegex.test(value)) {
     return `${value.substring(0, 8)}...${value.substring(value.length - 4)}`
@@ -57,7 +56,6 @@ export default function AuditLogs() {
   const [selectedLog, setSelectedLog] = useState(null)
   const [showLogDetail, setShowLogDetail] = useState(false)
 
-  // DEFINIR loadLogs ANTES del useEffect
   const loadLogs = useCallback(async () => {
     setLoading(true)
     try {
@@ -80,7 +78,6 @@ export default function AuditLogs() {
     loadLogs()
   }, [loadLogs])
 
-  // Resetear página cuando cambian los filtros
   const handleSearchChange = (value) => {
     setFilters(f => ({ ...f, search: value }))
     setPagination(p => ({ ...p, page: 1 }))
@@ -96,7 +93,6 @@ export default function AuditLogs() {
     setPagination(p => ({ ...p, page: 1 }))
   }
 
-  // Filtrar localmente por búsqueda
   const filteredLogs = logs.filter(log => {
     if (!filters.search) return true
     const searchLower = filters.search.toLowerCase()

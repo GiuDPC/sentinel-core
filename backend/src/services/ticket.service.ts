@@ -19,7 +19,6 @@ async function autoAssign(
   creatorId: string,
   tx: TransactionClient
 ) {
-  // Construir where clause dinámicamente
   const whereClause: Prisma.UserWhereInput = {
     role: { name: ROLES.TECHNICIAN },
     isActive: true,
@@ -43,7 +42,6 @@ async function autoAssign(
 
   if (technicians.length === 0) return null;
 
-  // Ordenar por menor carga de trabajo (least connections)
   const sorted = technicians
     .map((tech) => ({
       id: tech.id,
@@ -57,22 +55,18 @@ async function autoAssign(
   const bestTechId = bestTech.id;
   const bestTechName = `${bestTech.firstName} ${bestTech.lastName}`;
 
-  // Crear asignación
   await tx.assignment.create({
     data: { ticketId, technicianId: bestTechId },
   });
 
-  // Cambiar a ASSIGNED
   await tx.ticket.update({
     where: { id: ticketId },
     data: { status: TICKET_STATUS.ASSIGNED },
   });
 
-  // Audit logs
   await auditService.logAction(ticketId, creatorId, AUDIT_ACTIONS.STATUS_CHANGE, TICKET_STATUS.OPEN, TICKET_STATUS.ASSIGNED, tx);
   await auditService.logAction(ticketId, creatorId, AUDIT_ACTIONS.ASSIGNMENT, null, bestTechName, tx);
 
-  // Notificar al técnico
   const ticketInfo = await tx.ticket.findUnique({ where: { id: ticketId } });
   if (ticketInfo) {
     await notificationService.createNotification({
@@ -95,10 +89,8 @@ async function create(data: {
   priority: string;
   creatorId: string;
 }) {
-  // Sanitizar input para prevenir XSS
   const sanitized = sanitizeTicketInput(data);
   
-  // Validar que priority sea un valor válido
   const validPriorities = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
   const priority = validPriorities.includes(sanitized.priority) ? sanitized.priority : 'MEDIUM';
   
@@ -143,7 +135,6 @@ async function create(data: {
       },
     });
 
-    // Auto-asignación inteligente basada en departamento de la categoría
     const assignedTechId = await autoAssign(
       ticket.id,
       category.department,
@@ -151,7 +142,6 @@ async function create(data: {
       tx
     );
 
-    // Re-fetch con la asignación incluida
     const finalTicket = await tx.ticket.findUnique({
       where: { id: ticket.id },
       include: {
@@ -171,7 +161,6 @@ async function create(data: {
     if (!finalTicket) throw new AppError(500, 'Error al recuperar el ticket creado');
 
 
-    // Notificar a los administradores del nuevo ticket
     await notificationService.notifyAdmins({
       title: 'Nuevo Ticket Creado',
       message: `El locatario ${finalTicket.creator.firstName} ha creado el ticket #${finalTicket.ticketCode}`,
@@ -179,7 +168,6 @@ async function create(data: {
       link: `/admin/tickets?search=${finalTicket.ticketCode}`
     });
 
-    // Notificar al creador que su ticket ha sido creado (opcional, pero útil para feedback)
     await notificationService.createNotification({
       userId: finalTicket.creatorId,
       title: 'Ticket Creado con Éxito',
@@ -209,7 +197,6 @@ async function findAll(filters: {
   if (filters.priority) where.priority = filters.priority as TicketPriority;
   if (filters.categoryId) where.categoryId = filters.categoryId;
 
-  // Búsqueda "Super Power" por texto en múltiples campos y relaciones
   if (filters.search) {
     const searchTerms = filters.search.trim().split(/\s+/);
     where.AND = searchTerms.map(term => ({
@@ -329,7 +316,6 @@ async function updateStatus(
   userId: string,
   userRole: string
 ) {
-  // Validar que el status sea un valor válido del enum
   const validStatuses = Object.values(TICKET_STATUS);
   if (!validStatuses.includes(newStatus as TicketStatus)) {
     throw new AppError(400, 'Estado inválido');
@@ -347,7 +333,6 @@ async function updateStatus(
     throw new AppError(404, 'Ticket no encontrado');
   }
 
-  // Verificar ownership para técnicos
   if (userRole === ROLES.TECHNICIAN) {
     const isAssigned = ticket.assignments.some((a) => a.technicianId === userId);
     if (!isAssigned) {
@@ -382,7 +367,6 @@ async function updateStatus(
       tx
     );
 
-    // Notificar al creador del cambio de estado
     await notificationService.createNotification({
       userId: ticket.creatorId,
       title: 'Actualización de Ticket',
@@ -410,7 +394,6 @@ async function resolveWithNote(
   });
   if (!ticket) throw new AppError(404, 'Ticket no encontrado');
 
-  // Verificar que el técnico está asignado a este ticket
   const isAssigned = ticket.assignments.some((a) => a.technicianId === userId);
   if (!isAssigned) {
     throw new AppError(403, 'Solo podés resolver tickets asignados a vos');
@@ -445,7 +428,6 @@ async function resolveWithNote(
     await auditService.logAction(ticketId, userId, AUDIT_ACTIONS.STATUS_CHANGE, ticket.status, TICKET_STATUS.AWAITING_CONFIRMATION, tx);
     await auditService.logAction(ticketId, userId, AUDIT_ACTIONS.RESOLUTION_NOTE, null, data.resolutionNote.trim(), tx);
 
-    // Notificar al creador que debe confirmar
     await notificationService.createNotification({
       userId: ticket.creatorId,
       title: 'Ticket Resuelto',
@@ -481,7 +463,6 @@ async function confirmTicket(
 
   return prisma.$transaction(async (tx) => {
     if (data.confirmed) {
-      // Confirmar → CLOSED (sin rating)
       const updated = await tx.ticket.update({
         where: { id: ticketId },
         data: {
@@ -496,7 +477,6 @@ async function confirmTicket(
       await auditService.logAction(ticketId, userId, AUDIT_ACTIONS.STATUS_CHANGE, TICKET_STATUS.AWAITING_CONFIRMATION, TICKET_STATUS.CLOSED, tx);
       await auditService.logAction(ticketId, userId, AUDIT_ACTIONS.TICKET_CONFIRMED, null, 'Confirmado por el solicitante', tx);
 
-      // Notificar al técnico que el ticket fue confirmado/cerrado
       const assignment = await tx.assignment.findFirst({ where: { ticketId } });
       if (assignment) {
         await notificationService.createNotification({
@@ -510,7 +490,6 @@ async function confirmTicket(
 
       return updated;
     } else {
-      // Reabrir → IN_PROGRESS
       const updated = await tx.ticket.update({
         where: { id: ticketId },
         data: {
@@ -527,7 +506,6 @@ async function confirmTicket(
       await auditService.logAction(ticketId, userId, AUDIT_ACTIONS.STATUS_CHANGE, TICKET_STATUS.AWAITING_CONFIRMATION, TICKET_STATUS.IN_PROGRESS, tx);
       await auditService.logAction(ticketId, userId, AUDIT_ACTIONS.TICKET_REOPENED, null, data.comment || 'Falla persiste', tx);
 
-      // Notificar al técnico de la reapertura
       const assignment = await tx.assignment.findFirst({ where: { ticketId } });
       if (assignment) {
         await notificationService.createNotification({

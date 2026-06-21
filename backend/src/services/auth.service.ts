@@ -6,7 +6,6 @@ import { JWT_EXPIRATION } from '../config/constants.js';
 import { AppError } from '../utils/app-error.js';
 import { Department } from '@prisma/client';
 
-// Helper para acceder al role con el include
 type UserWithRole = Awaited<ReturnType<typeof prisma.user.findUnique>> & { role: { name: string } };
 
 async function login(email: string, password: string) {
@@ -63,7 +62,6 @@ async function register(data: {
     throw new AppError(409, 'El email ya está registrado');
   }
 
-  // Si no viene roleId, se asigna REQUESTER (id = 3) por defecto
   let roleId = data.roleId;
   if (!roleId) {
     const requesterRole = await prisma.role.findUnique({
@@ -109,7 +107,6 @@ async function registerPublic(data: {
   storeNumber?: string;
   storeName?: string;
 }) {
-  // Verificar email único
   const existing = await prisma.user.findUnique({
     where: { email: data.email },
   });
@@ -117,7 +114,6 @@ async function registerPublic(data: {
     throw new AppError(409, 'El email ya está registrado');
   }
 
-  // Obtener rol REQUESTER obligatoriamente
   const requesterRole = await prisma.role.findUnique({
     where: { name: 'REQUESTER' },
   });
@@ -127,7 +123,6 @@ async function registerPublic(data: {
 
   const passwordHash = await argon2.hash(data.password);
 
-  // Crear usuario REQUESTER (sin department - son ciudadanos)
   const user = (await prisma.user.create({
     data: {
       firstName: data.firstName,
@@ -191,13 +186,11 @@ async function changePassword(userId: string, currentPassword: string, newPasswo
     throw new AppError(401, 'Usuario no encontrado o inactivo');
   }
 
-  // Verificar contraseña actual
   const valid = await argon2.verify(user.passwordHash, currentPassword);
   if (!valid) {
     throw new AppError(401, 'La contraseña actual es incorrecta');
   }
 
-  // Hashear nueva contraseña
   const newHash = await argon2.hash(newPassword);
 
   await prisma.user.update({

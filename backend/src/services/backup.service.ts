@@ -7,12 +7,10 @@ import { AppError } from '../utils/app-error.js';
 
 const execFileAsync = util.promisify(execFile);
 const RAW_DB_URL = process.env.DATABASE_URL || '';
-// pg_dump y psql no soportan el parámetro '?schema=public' de Prisma, hay que sacarlo
 const DB_URL = RAW_DB_URL.split('?')[0];
 
 const BACKUPS_DIR = path.resolve(process.cwd(), 'backups');
 
-// Asegurar que el directorio existe
 if (!fs.existsSync(BACKUPS_DIR)) {
   fs.mkdirSync(BACKUPS_DIR, { recursive: true });
 }
@@ -43,7 +41,6 @@ async function listBackups(): Promise<BackupMetadata[]> {
     };
   });
 
-  // Ordenar los más nuevos primero
   return backups.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
