@@ -51,30 +51,32 @@ export default function CategoryManagement() {
             </p>
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-slate-50/50 border-b border-slate-200">
-                <th className="px-6 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Categoría</th>
-                <th className="px-6 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Departamento</th>
-                <th className="px-6 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">SLA</th>
-                <th className="px-6 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Estado</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {categories.map((c) => (
-                <tr key={c.id} className="hover:bg-slate-50/80 transition-all group">
-                  <td className="px-6 py-4 text-xs font-bold text-slate-800">{c.name}</td>
-                  <td className="px-6 py-4 text-xs text-slate-500">{deptLabels[c.department] || c.department}</td>
-                  <td className="px-6 py-4"><span className="text-xs font-bold text-blue-600">{c.slaHours}h</span></td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${c.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
-                      {c.isActive ? 'Activa' : 'Inactiva'}
-                    </span>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm whitespace-nowrap">
+              <thead>
+                <tr className="bg-slate-50/50 border-b border-slate-200">
+                  <th className="px-6 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Categoría</th>
+                  <th className="px-6 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Departamento</th>
+                  <th className="px-6 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">SLA</th>
+                  <th className="px-6 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Estado</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {categories.map((c) => (
+                  <tr key={c.id} className="hover:bg-slate-50/80 transition-all group">
+                    <td className="px-6 py-4 text-xs font-bold text-slate-800">{c.name}</td>
+                    <td className="px-6 py-4 text-xs text-slate-500">{deptLabels[c.department] || c.department}</td>
+                    <td className="px-6 py-4"><span className="text-xs font-bold text-blue-600">{c.slaHours}h</span></td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${c.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
+                        {c.isActive ? 'Activa' : 'Inactiva'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
