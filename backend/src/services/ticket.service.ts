@@ -113,7 +113,7 @@ async function create(data: {
         description: sanitized.description,
         location: sanitized.location,
         categoryId: sanitized.categoryId,
-        priority: priority,
+        priority: priority as TicketPriority,
         creatorId: sanitized.creatorId,
         dueDate,
       },
@@ -188,8 +188,8 @@ async function findAll(filters: {
   page?: number;
   limit?: number;
 }) {
-  const page = filters.page || 1;
-  const limit = filters.limit || 20;
+  const page = Math.max(1, filters.page || 1);
+  const limit = Math.min(filters.limit || 20, 100); // M4: cap máximo para prevenir DoS
   const skip = (page - 1) * limit;
 
   const where: Prisma.TicketWhereInput = {};
@@ -264,7 +264,13 @@ async function findAll(filters: {
   };
 }
 
-async function findById(id: string, userRole?: string) {
+/**
+ * C3: findById con verificación de propiedad por rol.
+ * - ADMIN: acceso total
+ * - TECHNICIAN: solo tickets asignados a él
+ * - REQUESTER: solo tickets que creó
+ */
+async function findById(id: string, userRole?: string, userId?: string) {
   const ticket = await prisma.ticket.findUnique({
     where: { id },
     include: {
@@ -301,6 +307,19 @@ async function findById(id: string, userRole?: string) {
 
   if (!ticket) {
     throw new AppError(404, 'Ticket no encontrado');
+  }
+
+  // C3: Verificación de acceso por rol
+  if (userId && userRole) {
+    if (userRole === ROLES.REQUESTER && ticket.creatorId !== userId) {
+      throw new AppError(403, 'No tenés acceso a este ticket');
+    }
+    if (userRole === ROLES.TECHNICIAN) {
+      const isAssigned = ticket.assignments.some((a) => a.technicianId === userId);
+      if (!isAssigned) {
+        throw new AppError(403, 'Solo podés ver tickets asignados a vos');
+      }
+    }
   }
 
   return ticket;
@@ -526,8 +545,8 @@ async function confirmTicket(
  * Tickets creados por un solicitante específico.
  */
 async function findByCreator(creatorId: string, filters: { status?: string; priority?: string; search?: string; page?: number; limit?: number }) {
-  const page = filters.page || 1;
-  const limit = filters.limit || 20;
+  const page = Math.max(1, filters.page || 1);
+  const limit = Math.min(filters.limit || 20, 100); // M4: cap máximo
   const skip = (page - 1) * limit;
 
   const where: Prisma.TicketWhereInput = { creatorId };
@@ -588,8 +607,8 @@ async function findByCreator(creatorId: string, filters: { status?: string; prio
  * Tickets asignados a un técnico específico.
  */
 async function findAssigned(technicianId: string, filters: { status?: string; priority?: string; search?: string; page?: number; limit?: number }) {
-  const page = filters.page || 1;
-  const limit = filters.limit || 20;
+  const page = Math.max(1, filters.page || 1);
+  const limit = Math.min(filters.limit || 20, 100); // M4: cap máximo
   const skip = (page - 1) * limit;
 
   const where: Prisma.TicketWhereInput = {

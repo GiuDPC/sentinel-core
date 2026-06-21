@@ -647,17 +647,17 @@ export default function MyTickets() {
             </div>
           </div>
 
-          <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+          <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex flex-col-reverse sm:flex-row justify-end gap-3">
             <button
               onClick={() => setShowConfirm(false)}
-              className="px-6 py-2.5 text-sm font-bold uppercase tracking-widest text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-all cursor-pointer"
+              className="w-full sm:w-auto px-6 py-2.5 text-sm font-bold uppercase tracking-widest text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-all cursor-pointer"
             >
               Cancelar
             </button>
             <button
               onClick={handleConfirm}
               disabled={submitting}
-              className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-bold uppercase tracking-widest text-white shadow-lg shadow-slate-900/20 transition-all hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-bold uppercase tracking-widest text-white shadow-lg shadow-slate-900/20 transition-all hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
             >
               {submitting ? 'Procesando...' : 'Confirmar y Cerrar'}
             </button>
@@ -697,17 +697,17 @@ export default function MyTickets() {
             </div>
           </div>
 
-          <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+          <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex flex-col-reverse sm:flex-row justify-end gap-3">
             <button
               onClick={() => setShowReopen(false)}
-              className="px-6 py-2.5 text-sm font-bold uppercase tracking-widest text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-all cursor-pointer"
+              className="w-full sm:w-auto px-6 py-2.5 text-sm font-bold uppercase tracking-widest text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-all cursor-pointer"
             >
               Volver
             </button>
             <button
               onClick={handleReopenConfirm}
               disabled={submitting || reopenComment.trim().length < 10}
-              className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-bold uppercase tracking-widest text-white shadow-lg shadow-slate-900/20 transition-all hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-bold uppercase tracking-widest text-white shadow-lg shadow-slate-900/20 transition-all hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
             >
               {submitting ? 'Procesando...' : 'Enviar Reapertura'}
             </button>

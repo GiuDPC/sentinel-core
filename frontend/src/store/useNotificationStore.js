@@ -25,7 +25,7 @@ export const useNotificationStore = create((set, get) => ({
     if (intervalId) clearInterval(intervalId);
     
     fetchNotifications();
-    const newIntervalId = setInterval(fetchNotifications, 10000);
+    const newIntervalId = setInterval(fetchNotifications, 30000); // M1: 30s reduce carga en Render (era 10s)
     set({ intervalId: newIntervalId });
   },
 

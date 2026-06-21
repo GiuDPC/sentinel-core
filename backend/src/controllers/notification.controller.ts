@@ -19,9 +19,12 @@ export class NotificationController {
   async markAsRead(req: Request, res: Response) {
     try {
       const { id } = req.params
+      const userId = req.user?.id
       if (!id) return res.status(400).json({ message: 'ID requerido' })
+      if (!userId) return res.status(401).json({ message: 'No autorizado' })
       
-      await notificationService.markAsRead(id as string)
+      // C2: ownership verificado en el service
+      await notificationService.markAsRead(id as string, userId)
       res.json({ message: 'Notificación leída' })
     } catch (error: any) {
       res.status(500).json({ message: error.message })

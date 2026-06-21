@@ -42,7 +42,8 @@ async function findById(req: Request, res: Response, next: NextFunction) {
   try {
     const ticket = await ticketService.findById(
       String(req.params.id),
-      req.user?.role
+      req.user?.role,
+      req.user?.id   // C3: necesario para verificar ownership
     );
     res.json({ ticket });
   } catch (error) {
@@ -164,10 +165,14 @@ async function confirmTicket(req: Request, res: Response, next: NextFunction) {
 
 async function getClosureReport(req: Request, res: Response, next: NextFunction) {
   try {
-    const pdfBuffer = await closureReportService.generateClosureReport(String(req.params.id));
+    const ticketId = String(req.params.id);
+    // H1: Verificar acceso al ticket antes de generar el PDF (reutiliza la lógica de C3)
+    await ticketService.findById(ticketId, req.user?.role, req.user?.id);
+
+    const pdfBuffer = await closureReportService.generateClosureReport(ticketId);
     res.set({
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="acta-resolucion-${req.params.id.slice(0, 8)}.pdf"`,
+      'Content-Disposition': `attachment; filename="acta-resolucion-${ticketId.slice(0, 8)}.pdf"`,
       'Content-Length': pdfBuffer.length,
     });
     res.send(pdfBuffer);
