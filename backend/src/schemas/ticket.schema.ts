@@ -17,6 +17,8 @@ export const updateStatusSchema = z.object({
 
 export const resolveTicketSchema = z.object({
   resolutionNote: z.string().min(10, 'La nota de resolución debe tener al menos 10 caracteres'),
+  timeSpentMinutes: z.number().int().min(1, 'El tiempo debe ser al menos 1 minuto').optional(),
+  materialsUsed: z.string().max(500, 'Máximo 500 caracteres').optional(),
 });
 
 export const confirmTicketSchema = z.object({

@@ -88,6 +88,12 @@ router.post(
   ticketController.confirmTicket
 );
 
+// GET /api/tickets/:id/closure-report — Descargar Acta de Resolución (PDF)
+router.get(
+  '/:id/closure-report',
+  ticketController.getClosureReport
+);
+
 // Montar sub-rutas de comentarios
 router.use('/:ticketId/comments', commentRoutes);
 

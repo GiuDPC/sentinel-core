@@ -58,11 +58,27 @@ export const ticketsApi = {
     return apiClient.get(`/tickets/technicians/workload${query}`)
   },
 
-  resolveWithNote(ticketId, resolutionNote) {
-    return apiClient.post(`/tickets/${ticketId}/resolve`, { resolutionNote })
+  resolveWithNote(ticketId, { resolutionNote, timeSpentMinutes, materialsUsed }) {
+    return apiClient.post(`/tickets/${ticketId}/resolve`, {
+      resolutionNote,
+      ...(timeSpentMinutes != null && { timeSpentMinutes }),
+      ...(materialsUsed && { materialsUsed }),
+    })
   },
 
   confirmTicket(ticketId, { confirmed, comment }) {
     return apiClient.post(`/tickets/${ticketId}/confirm`, { confirmed, comment })
+  },
+
+  async getClosureReport(ticketId) {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+    const res = await fetch(`${API_URL}/tickets/${ticketId}/closure-report`, {
+      credentials: 'include',
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.message || 'Error al descargar el acta')
+    }
+    return res.blob()
   },
 }

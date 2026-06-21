@@ -49,6 +49,9 @@ async function main() {
   const admin2 = await prisma.user.create({
     data: { firstName: 'Director', lastName: 'Operaciones', email: 'director@sentinel.local', passwordHash: pw, roleId: adminRole.id, department: 'ADMINISTRACION' },
   });
+  const profAdmin = await prisma.user.create({
+    data: { firstName: 'Profesor', lastName: 'Evaluador (Admin)', email: 'profesor.admin@sentinel.local', passwordHash: pw, roleId: adminRole.id, department: 'ADMINISTRACION' },
+  });
 
   const techs = await Promise.all([
     prisma.user.create({ data: { firstName: 'Carlos', lastName: 'Perez', email: 'carlos.perez@sentinel.local', passwordHash: tpw, roleId: techRole.id, department: 'MANTENIMIENTO_ELECTRICO', phone: '0412-1234567' } }),
@@ -59,6 +62,7 @@ async function main() {
   ]);
 
   const locs = await Promise.all([
+    prisma.user.create({ data: { firstName: 'Profesor', lastName: 'Prueba (Locatario)', email: 'profesor.locatario@sentinel.local', passwordHash: rpw, roleId: reqRole.id, storeNumber: 'UNEFA-01', storeName: 'Laboratorio de Evaluacion UNEFA' } }),
     prisma.user.create({ data: { firstName: 'Juan', lastName: 'Garcia', email: 'juan.garcia@sentinel.local', passwordHash: rpw, roleId: reqRole.id, storeNumber: 'L-105', storeName: 'Tienda JG Fashion' } }),
     prisma.user.create({ data: { firstName: 'Ana', lastName: 'Martinez', email: 'ana.martinez@sentinel.local', passwordHash: rpw, roleId: reqRole.id, storeNumber: 'L-210', storeName: 'Cafe Martinez' } }),
     prisma.user.create({ data: { firstName: 'Roberto', lastName: 'Diaz', email: 'roberto.diaz@sentinel.local', passwordHash: rpw, roleId: reqRole.id, storeNumber: 'L-302', storeName: 'Electronica Diaz' } }),
@@ -155,12 +159,14 @@ async function main() {
   }
 
   console.log(`\n=== SEED COMPLETADO ===`);
-  console.log(`Roles: 3 | Categorias: ${cats.length} | Admins: 2 | Tecnicos: ${techs.length} | Locatarios: ${locs.length}`);
+  console.log(`Roles: 3 | Categorias: ${cats.length} | Admins: 3 | Tecnicos: ${techs.length} | Locatarios: ${locs.length}`);
   console.log(`Tickets: ${defs.length} (6 OPEN, 4 ASSIGNED, 5 IN_PROGRESS, 3 AWAITING, 4 RESOLVED, 7 CLOSED)`);
-  console.log(`\nCredenciales:`);
-  console.log(`  Admin:     admin@sentinel.local / SentinelAdmin2026!`);
-  console.log(`  Tecnico:   carlos.perez@sentinel.local / Tecnico2026!`);
-  console.log(`  Locatario: ana.martinez@sentinel.local / Locatario2026!`);
+  console.log(`\nCredenciales de Acceso para el Jurado Evaluador (UNEFA):`);
+  console.log(`  👨‍💻 Admin:      profesor.admin@sentinel.local      / SentinelAdmin2026!`);
+  console.log(`  🏬 Locatario:  profesor.locatario@sentinel.local  / Locatario2026!`);
+  console.log(`\nCredenciales de Prueba Extra:`);
+  console.log(`  🛠️ Tecnico:    carlos.perez@sentinel.local        / Tecnico2026!`);
+  console.log(`  👨‍💼 Admin Ppal: admin@sentinel.local               / SentinelAdmin2026!`);
 }
 
 main()

@@ -46,14 +46,35 @@ export default function TicketList() {
   const [detailModal, setDetailModal] = useState(false)
   const [detailTicket, setDetailTicket] = useState(null)
   const [loadingDetail, setLoadingDetail] = useState(false)
+  const [downloadingPdf, setDownloadingPdf] = useState(false)
 
-  // Debounced search — single ref to avoid double fetch
+  const handleDownloadPdf = async (ticketId, ticketCode) => {
+    try {
+      setDownloadingPdf(true)
+      const blob = await ticketsApi.getClosureReport(ticketId)
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `acta-resolucion-${ticketCode}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      a.remove()
+    } catch (error) {
+      console.error('Error downloading PDF:', error)
+      notifications.error('No se pudo descargar el acta de resolución.', 'Error')
+    } finally {
+      setDownloadingPdf(false)
+    }
+  }
+
   const searchTimerRef = useRef(null)
   const isInitialMount = useRef(true)
-  const loadTicketsRef = useRef(null)
-
-  // DEFINIR loadTickets ANTES de los useEffects
+  // 1. Callback memoizado con todas sus dependencias correctas para ESLint
   const loadTickets = useCallback(async () => {
+    // Se utiliza Promise.resolve() para diferir la ejecución y evitar la advertencia
+    // de "Calling setState synchronously within an effect" de React.
+    await Promise.resolve()
     setLoading(true)
     try {
       const data = await ticketsApi.getAll({
@@ -72,48 +93,44 @@ export default function TicketList() {
     }
   }, [filters.status, filters.priority, filters.search, pagination.page])
 
-  // Leer search de URL al cambiar
+  // 2. Sincronizar URL parameters al estado (sin ejecutar setState síncrono)
   useEffect(() => {
     const urlSearch = searchParams.get('search')
     if (urlSearch !== null && urlSearch !== filters.search) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setFilters(f => ({ ...f, search: urlSearch }))
-      setPagination(p => ({ ...p, page: 1 }))
+      Promise.resolve().then(() => {
+        setFilters(f => ({ ...f, search: urlSearch }))
+        setPagination(p => ({ ...p, page: 1 }))
+      })
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams])
+  }, [searchParams, filters.search])
 
-  // Carga inicial explícita al montar
+  // 3. Control maestro de carga de datos (Mount y Filtros)
   useEffect(() => {
-    loadTicketsRef.current = loadTickets
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadTickets()
-    isInitialMount.current = false
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // Solo se dispara por cambios en filtros de select (no search, no mount)
-  useEffect(() => {
-    if (isInitialMount.current) return
-    loadTickets()
-  }, [filters.status, filters.priority, pagination.page, loadTickets])
-
-  // Debounce search 400ms — separado de los otros filtros
-  useEffect(() => {
-    if (isInitialMount.current) return
-    if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
-    searchTimerRef.current = setTimeout(() => {
+    // Prevención para no disparar carga doble en mount si el buscador cambia rápido
+    if (isInitialMount.current) {
+      isInitialMount.current = false
       loadTickets()
-    }, 400)
-    return () => clearTimeout(searchTimerRef.current)
-  }, [filters.search, loadTickets])
+      return
+    }
 
-  // Abrir modal automáticamente si viene ticketId en la URL
+    // Si cambió el "search", lo maneja el setTimeout (debounce). 
+    // Si cambió status, priority o page, cargamos directo.
+    if (searchTimerRef.current !== filters.search) {
+      // Es un cambio de search, guardamos el ref para el debounce y no disparamos directo
+      searchTimerRef.current = filters.search
+      const timer = setTimeout(() => {
+        loadTickets()
+      }, 400)
+      return () => clearTimeout(timer)
+    } else {
+      // Es un cambio de página, status o priority
+      loadTickets()
+    }
+  }, [loadTickets, filters.search])
+
   useEffect(() => {
     const ticketId = searchParams.get('ticketId')
     if (ticketId) {
-      // Usamos el ticketId directamente para abrir el modal, 
-      // la función openDetailModal ya se encarga de buscar el detalle por ID
       openDetailModal(ticketId)
     }
   }, [searchParams])
@@ -169,7 +186,6 @@ export default function TicketList() {
     setPagination(p => ({ ...p, page: 1 }))
   }, [])
 
-  // Determina si un ticket puede ser reasignado (tiene asignación y no está cerrado)
   function canReassign(ticket) {
     return ticket.assignments?.length > 0 && ticket.status !== 'CLOSED'
   }
@@ -186,10 +202,8 @@ return (
         </div>
       </div>
 
-      {/* Filtros - Estilo Locatario/Técnico */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-1 items-center gap-2">
-          {/* Buscador */}
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input 
@@ -402,7 +416,7 @@ return (
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {tickets.map((ticket, index) => {
+                {tickets.map((ticket) => {
                   const isSlaBreached = ticket.dueDate && new Date(ticket.dueDate) < new Date() && !['RESOLVED', 'CLOSED'].includes(ticket.status);
                   const isSlaAtRisk = ticket.dueDate && !isSlaBreached && new Date(ticket.dueDate) < new Date(new Date().getTime() + 2 * 60 * 60 * 1000);
                   return (
@@ -706,13 +720,50 @@ return (
                 {/* Nota de resolucion */}
                 {detailTicket.resolutionNote && (
                   <div className="px-6 py-5 border-b border-slate-100 bg-emerald-50/30">
-                    <h4 className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest mb-3 flex items-center gap-2">
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                      Reporte de Resolución Técnica
-                    </h4>
-                    <p className="text-sm text-slate-700 leading-relaxed border-l-2 border-emerald-300 pl-4">
-                      {detailTicket.resolutionNote}
-                    </p>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h4 className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest mb-3 flex items-center gap-2">
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                          Reporte de Resolución Técnica
+                        </h4>
+                        <p className="text-sm text-slate-700 leading-relaxed border-l-2 border-emerald-300 pl-4 mb-4">
+                          {detailTicket.resolutionNote}
+                        </p>
+                      </div>
+                      {['AWAITING_CONFIRMATION', 'RESOLVED', 'CLOSED'].includes(detailTicket.status) && (
+                        <button
+                          onClick={() => handleDownloadPdf(detailTicket.id, detailTicket.ticketCode)}
+                          disabled={downloadingPdf}
+                          className="flex items-center gap-2 px-4 py-2 bg-white border border-emerald-200 text-emerald-700 text-xs font-bold rounded-xl hover:bg-emerald-50 hover:border-emerald-300 transition-all shadow-sm disabled:opacity-50"
+                        >
+                          {downloadingPdf ? (
+                            <div className="w-4 h-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                          )}
+                          Descargar Acta (PDF)
+                        </button>
+                      )}
+                    </div>
+                    {/* Consumos (opcional) */}
+                    {(detailTicket.timeSpentMinutes > 0 || detailTicket.materialsUsed) && (
+                      <div className="mt-4 grid grid-cols-2 gap-4 bg-white/60 p-4 rounded-xl border border-emerald-100">
+                        {detailTicket.timeSpentMinutes > 0 && (
+                          <div>
+                            <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest mb-1">Tiempo Invertido</p>
+                            <p className="text-sm font-bold text-emerald-900">{Math.floor(detailTicket.timeSpentMinutes / 60)}h {detailTicket.timeSpentMinutes % 60}m</p>
+                          </div>
+                        )}
+                        {detailTicket.materialsUsed && (
+                          <div>
+                            <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest mb-1">Materiales Usados</p>
+                            <p className="text-xs font-medium text-emerald-900">{detailTicket.materialsUsed}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 

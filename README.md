@@ -388,6 +388,47 @@ cd backend && npm test
 
 ---
 
+## Guía de Despliegue en Producción (Tesis UNEFA)
+
+Para mantener tu entorno local intacto y tener una copia del proyecto en la nube accesible para el jurado, se recomienda la siguiente arquitectura moderna y gratuita:
+
+### 1. Base de Datos (PostgreSQL en la Nube)
+- **Proveedor Recomendado**: [Neon.tech](https://neon.tech/) o [Supabase](https://supabase.com/).
+- **Ventaja**: Son gratuitos, muy rápidos y te dan un `DATABASE_URL` listo para usar en tu `.env`.
+
+### 2. Backend (Node.js API)
+- **Proveedor Recomendado**: [Render](https://render.com/) o [Railway](https://railway.app/).
+- **Cómo hacerlo**: 
+  1. Conecta tu repositorio de GitHub.
+  2. Selecciona la carpeta `backend`.
+  3. Comando de Build: `npm install && npm run build`
+  4. Comando de Inicio: `npm start`
+  5. Variables de entorno: Pega el `DATABASE_URL` de Neon/Supabase y tu `JWT_SECRET`.
+
+### 3. Frontend (React / Vite)
+- **Proveedor Recomendado**: [Vercel](https://vercel.com/) o [Netlify](https://www.netlify.com/).
+- **Cómo hacerlo**:
+  1. Conecta tu repositorio.
+  2. Selecciona la carpeta `frontend`.
+  3. Build command: `npm run build`
+  4. Output directory: `dist`
+  5. Variables de entorno: `VITE_API_URL` apuntando a la URL que te generó Render en el paso anterior.
+
+---
+
+## Credenciales de Acceso para el Jurado Evaluador
+
+Al ejecutar `npx prisma db seed` en producción, se crearán estas cuentas de prueba:
+
+| Rol | Usuario | Contraseña |
+| --- | --- | --- |
+| **👨‍💻 Admin Principal** | `admin@sentinel.local` | `SentinelAdmin2026!` |
+| **👨‍🏫 Profesor Admin** | `profesor.admin@sentinel.local` | `SentinelAdmin2026!` |
+| **🏬 Profesor Locatario** | `profesor.locatario@sentinel.local` | `Locatario2026!` |
+| **🛠️ Técnico Prueba** | `carlos.perez@sentinel.local` | `Tecnico2026!` |
+
+---
+
 ## Contribución
 
 1. Fork el repositorio
@@ -409,4 +450,4 @@ MIT License - Ver [LICENSE.md](LICENSE.md)
 - [@GiuDPC](https://github.com/GiuDPC)
 - [@Gabrielart2005](https://github.com/Gabrielart2005)
 
-Proyecto desarrollado en 2026.
+Proyecto desarrollado en 2026 para el Centro Comercial Sambil Paraguaná.

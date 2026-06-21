@@ -113,9 +113,11 @@ model Ticket {
   status         TicketStatus   @default(OPEN)
   priority       TicketPriority
   dueDate        DateTime?      @map("due_date")
-  resolutionNote String?        @map("resolution_note")
-  resolvedAt     DateTime?      @map("resolved_at")
-  createdAt      DateTime       @default(now()) @map("created_at")
+  resolutionNote   String?        @map("resolution_note")
+  resolvedAt       DateTime?      @map("resolved_at")
+  timeSpentMinutes Int?           @map("time_spent_minutes")
+  materialsUsed    String?        @map("materials_used")
+  createdAt        DateTime       @default(now()) @map("created_at")
   updatedAt      DateTime       @updatedAt @map("updated_at")
 
   creator     User         @relation("TicketCreator", fields: [creatorId], references: [id])
