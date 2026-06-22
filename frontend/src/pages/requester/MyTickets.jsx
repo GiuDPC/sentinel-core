@@ -352,7 +352,7 @@ export default function MyTickets() {
                   className="hover:bg-slate-50/80 transition-all group cursor-pointer border-b border-slate-100 last:border-0"
                 >
                     {visibleColumns.code && (
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <span className="font-mono text-[10px] font-bold text-indigo-950 bg-indigo-50/50 px-2 py-1 rounded-md border border-indigo-100 shadow-xs">
                           {ticket.ticketCode}
                         </span>
