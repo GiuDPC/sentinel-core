@@ -176,16 +176,16 @@ export default function ProfilePage() {
 
       <div className="space-y-6">
         <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-            <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">
+          <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest leading-relaxed">
               {user.role === 'TECHNICIAN' ? 'Información Técnica y Personal' : 'Información Personal y del Establecimiento'}
             </h4>
             {!isEditing ? (
-              <button onClick={() => setIsEditing(true)} className="px-3 py-1 bg-slate-900 text-white rounded text-[9px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all cursor-pointer">Editar</button>
+              <button onClick={() => setIsEditing(true)} className="shrink-0 px-4 py-1.5 bg-slate-900 text-white rounded-md text-[9px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all cursor-pointer shadow-sm">Editar</button>
             ) : (
-              <div className="flex gap-3">
-                <button onClick={handleCancelEdit} className="text-[9px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-600 cursor-pointer">Cancelar</button>
-                <button onClick={handleSaveProfile} disabled={savingProfile} className="text-[9px] font-black text-emerald-600 uppercase tracking-widest hover:text-emerald-700 cursor-pointer">
+              <div className="flex gap-3 shrink-0">
+                <button onClick={handleCancelEdit} className="px-4 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-600 hover:bg-slate-100 rounded-md transition-all cursor-pointer">Cancelar</button>
+                <button onClick={handleSaveProfile} disabled={savingProfile} className="px-4 py-1.5 bg-emerald-600 text-white rounded-md text-[9px] font-black uppercase tracking-widest hover:bg-emerald-700 transition-all cursor-pointer shadow-sm disabled:opacity-50">
                   {savingProfile ? 'Guardando...' : 'Confirmar'}
                 </button>
               </div>
@@ -279,12 +279,12 @@ export default function ProfilePage() {
 
         {/* Seguridad */}
         <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-            <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Seguridad de Acceso</h4>
+          <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest leading-relaxed">Seguridad de Acceso</h4>
             {!isChangingPassword ? (
-              <button onClick={() => setIsChangingPassword(true)} className="text-[9px] font-black text-indigo-600 uppercase tracking-widest hover:text-indigo-700 transition-all cursor-pointer">Cambiar Contraseña</button>
+              <button onClick={() => setIsChangingPassword(true)} className="shrink-0 px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-md text-[9px] font-black uppercase tracking-widest hover:bg-indigo-100 hover:text-indigo-700 transition-all cursor-pointer shadow-sm">Cambiar Contraseña</button>
             ) : (
-              <button onClick={() => setIsChangingPassword(false)} className="text-[9px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-600 cursor-pointer">Cancelar</button>
+              <button onClick={() => setIsChangingPassword(false)} className="shrink-0 px-4 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-600 hover:bg-slate-100 rounded-md transition-all cursor-pointer">Cancelar</button>
             )}
           </div>
 
